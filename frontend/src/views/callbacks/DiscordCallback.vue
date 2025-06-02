@@ -16,7 +16,10 @@ onMounted(async () => {
   }
 
   try {
-    const res = await axios.post('import.meta.env.VITE_BACKEND_BASE_URL/functions/link-discord', { code })
+    const res = await axios.post(
+      import.meta.env.VITE_BACKEND_BASE_URL + '/functions/link-discord',
+      { code },
+    )
 
     if (!res.ok) {
       const err = await res.json()
