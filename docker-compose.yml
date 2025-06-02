@@ -30,7 +30,8 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=local
-    command: npm run dev -- --host 0.0.0.0
+    ports:
+      - "5173:5173"
     depends_on:
       - directus
 
@@ -46,6 +47,10 @@ services:
         condition: service_healthy
       cache:
         condition: service_healthy
+    ports:
+      - "8055:8055"
+    env_file:
+      - .env.local
     environment:
       SECRET: "replace-with-secure-random-value"
 
@@ -66,15 +71,17 @@ services:
       REDIS: "redis://cache:6379"
 
       ADMIN_EMAIL: "admin@example.com"
-      ADMIN_PASSWORD: "admin"
+      ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD}
 
-      PUBLIC_URL: 'https://dev.admin.astrobear.fr'
+      PUBLIC_URL: ${BACKEND_BASE_URL}
 
       CORS_ENABLED: 'true'
-      CORS_ORIGIN: 'http://localhost:5173'
+      CORS_ORIGIN: ${FRONTEND_BASE_URL}
 
   caddy:
     image: caddy:latest
+    profiles:
+      - staging
     ports:
       - "80:80"
       - "443:443"
@@ -84,3 +91,4 @@ services:
       - ./caddy_config:/config
     depends_on:
       - directus
+
