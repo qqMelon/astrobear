@@ -1,0 +1,38 @@
+name: 🚀 Deploy to Scaleway Staging env
+
+on:
+  push:
+    branches:
+      - trunk
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🔐 Setup SSH
+        uses: webfactory/ssh-agent@v0.8.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: 📝 Generate .env on server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_HOST }} << 'EOF'
+            cat <<EOT > /root/astrobear/.env
+      VITE_BASE_URL=${{ secrets.VITE_BASE_URL }}
+      FRONTEND_BASE_URL=${{ secrets.FRONTEND_BASE_URL }}
+      BACKEND_BASE_URL=${{ secrets.BACKEND_BASE_URL }}
+
+      DIRECTUS_ADMIN_PASSWORD=${{ secrets.DIRECTUS_ADMIN_PASSWORD }}
+      DISCORD_CLIENT_ID=${{ secrets.DISCORD_CLIENT_ID }}
+      DISCORD_CLIENT_SECRET=${{ secrets.DISCORD_CLIENT_SECRET }}
+      DISCORD_REDIRECT_URI=${{ secrets.DISCORD_REDIRECT_URI }}
+      EOT
+      EOF
+
+      - name: 🚀 Run deploy script on server
+        run: ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_HOST }} './deploy.sh'
