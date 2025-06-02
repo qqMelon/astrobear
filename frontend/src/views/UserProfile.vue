@@ -35,7 +35,7 @@ function openModal(type) {
 }
 
 function getAvatarUrl(fileId) {
-  return `import.meta.env.VITE_BACKEND_BASE_URL/assets/${fileId}`
+  return import.meta.env.VITE_BACKEND_BASE_URL + `/assets/${fileId}`
 }
 </script>
 
