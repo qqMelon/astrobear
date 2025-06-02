@@ -71,7 +71,6 @@ services:
       REDIS: "redis://cache:6379"
 
       ADMIN_EMAIL: "admin@example.com"
-      ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD}
 
       PUBLIC_URL: ${BACKEND_BASE_URL}
 
