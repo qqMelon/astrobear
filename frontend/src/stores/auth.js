@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
-const API_URL = 'http://localhost:8055'
+const API_URL = 'import.meta.env.VITE_BACKEND_BASE_URL'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
