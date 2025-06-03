@@ -5,6 +5,7 @@ import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
 const user = auth.user
+const beurl = import.meta.env.VITE_BACKEND_BASE_URL
 
 const router = useRouter()
 const showMobile = ref(false)
@@ -54,9 +55,7 @@ function logout() {
           <button class="uk-button uk-button-text" type="button">
             {{ user.first_name }}
             <img
-              :src="
-                import.meta.env.VITE_BACKEND_BASE_URL + `/assets/${user.avatar}` || defaultAvatar
-              "
+              :src="`${beurl}/assets/${user.avatar}` || defaultAvatar"
               class="uk-border-circle"
               width="32"
               height="32"
