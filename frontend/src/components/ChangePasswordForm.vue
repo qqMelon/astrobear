@@ -16,7 +16,7 @@ async function submitPasswordChange() {
   try {
     const token = localStorage.getItem('access_token')
 
-    const res = await fetch('import.meta.env.VITE_BACKEND_BASE_URL/users/me/password', {
+    const res = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/users/me/password', {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${token}`,

@@ -24,7 +24,8 @@ services:
       start_period: 30s
 
   frontend:
-    build: ./frontend
+    image: node:22-alpine
+    working_dir: /app
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -32,6 +33,7 @@ services:
       - NODE_ENV=local
     ports:
       - "5173:5173"
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
     depends_on:
       - directus
 
@@ -50,7 +52,7 @@ services:
     ports:
       - "8055:8055"
     env_file:
-      - .env.local
+      - .env
     environment:
       SECRET: "replace-with-secure-random-value"
 
@@ -74,8 +76,7 @@ services:
 
       PUBLIC_URL: ${BACKEND_BASE_URL}
 
-      CORS_ENABLED: 'true'
-      CORS_ORIGIN: ${FRONTEND_BASE_URL}
+      CORS_ENABLED: "true"
 
   caddy:
     image: caddy:latest
@@ -86,8 +87,7 @@ services:
       - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./caddy_data:/data
-      - ./caddy_config:/config
+      - ./caddy/data:/data
+      - ./caddy/config:/config
     depends_on:
       - directus
-

@@ -17,7 +17,7 @@ onMounted(async () => {
 
   try {
     const token = localStorage.getItem('access_token')
-    const res = await fetch('import.meta.env.VITE_BACKEND_BASE_URL/hooks/battlenet-link', {
+    const res = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/hooks/battlenet-link', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
