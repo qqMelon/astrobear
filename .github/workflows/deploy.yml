@@ -24,8 +24,8 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_HOST }} << 'EOF'
           cat <<EOT > /root/astrobear/.env
-          FRONTEND_BASE_URL=${{ secrets.FRONTEND_BASE_URL }}
-          BACKEND_BASE_URL=${{ secrets.BACKEND_BASE_URL }}
+          FRONTEND_BASE_URL=${{ vars.FRONTEND_BASE_URL }}
+          BACKEND_BASE_URL=${{ vars.BACKEND_BASE_URL }}
 
           ADMIN_PASSWORD=${{ secrets.DIRECTUS_ADMIN_PASSWORD }}
 
