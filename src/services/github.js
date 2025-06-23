@@ -7,7 +7,7 @@ export async function getLatestReleases() {
 
     if (!Array.isArray(release)) return []
 
-    return release.map((r) => ({
+    return release.map(r => ({
       title: r.name || r.tag_name,
       date: r.published_at,
       body: r.body,

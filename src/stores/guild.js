@@ -22,11 +22,11 @@ export const useGuildStore = defineStore('guild', () => {
     const nm = progress.value.progressRaceData.progressRace?.[0]
     const hm = progress.value.progressRaceData.progressRace?.[1]
 
-    if (nm?.encounters && nm.encounters.find((e) => !e.isKilled)) {
-      lastEncounter.value = nm.encounters.find((e) => !e.isKilled)
+    if (nm?.encounters && nm.encounters.find(e => !e.isKilled)) {
+      lastEncounter.value = nm.encounters.find(e => !e.isKilled)
       lastEncounter.value.difficulty = 'normal'
-    } else if (hm?.encounters && hm.encounters.find((e) => !e.isKilled)) {
-      lastEncounter.value = nm.encounters.find((e) => !e.isKilled)
+    } else if (hm?.encounters && hm.encounters.find(e => !e.isKilled)) {
+      lastEncounter.value = nm.encounters.find(e => !e.isKilled)
       lastEncounter.value.difficulty = 'heroic'
     } else {
       lastEncounter.value = hm?.encounters.slice(-1).pop()

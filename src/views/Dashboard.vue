@@ -1,29 +1,27 @@
 <script setup>
-import { onMounted, computed, ref, watch } from "vue";
-import { useGuildStore } from "@/stores/guild";
+import { onMounted, computed, ref, watch } from 'vue'
+import { useGuildStore } from '@/stores/guild'
 
-import Articles from "@/components/Articles.vue";
-import ProgressCard from "@/components/ProgressCard.vue";
-import RaidCalendar from "@/components/RaidCalendar.vue";
+import Articles from '@/components/Articles.vue'
+import ProgressCard from '@/components/ProgressCard.vue'
+import RaidCalendar from '@/components/RaidCalendar.vue'
 
-const guildStore = useGuildStore();
+const guildStore = useGuildStore()
 
 onMounted(async () => {
-  guildStore.fetchAllData();
-});
+  guildStore.fetchAllData()
+})
 
 // Computed pour les stats rapides
 const quickStats = computed(() => {
-  if (!guildStore.ranking) return null;
+  if (!guildStore.ranking) return null
   return {
-    progressRegion:
-      guildStore.ranking.guild.zoneRanking.progress.regionRank.number,
-    progressServer:
-      guildStore.ranking.guild.zoneRanking.progress.serverRank.number,
+    progressRegion: guildStore.ranking.guild.zoneRanking.progress.regionRank.number,
+    progressServer: guildStore.ranking.guild.zoneRanking.progress.serverRank.number,
     speedRegion: guildStore.ranking.guild.zoneRanking.speed.regionRank.number,
     speedServer: guildStore.ranking.guild.zoneRanking.speed.serverRank.number,
-  };
-});
+  }
+})
 </script>
 
 <template>
@@ -53,7 +51,7 @@ const quickStats = computed(() => {
               </div>
               <h3>Progression</h3>
             </div>
-            <div class="card-content" v-if="quickStats">
+            <div v-if="quickStats" class="card-content">
               <div class="stat-item">
                 <span class="stat-label">🌍 Région</span>
                 <span class="stat-value">#{{ quickStats.progressRegion }}</span>
@@ -63,7 +61,7 @@ const quickStats = computed(() => {
                 <span class="stat-value">#{{ quickStats.progressServer }}</span>
               </div>
             </div>
-            <div class="card-content" v-else>
+            <div v-else class="card-content">
               <div class="loading-state">
                 <div class="spinner"></div>
                 <span>Chargement...</span>
@@ -86,7 +84,7 @@ const quickStats = computed(() => {
               </div>
               <h3>Vitesse</h3>
             </div>
-            <div class="card-content" v-if="quickStats">
+            <div v-if="quickStats" class="card-content">
               <div class="stat-item">
                 <span class="stat-label">🌍 Région</span>
                 <span class="stat-value">#{{ quickStats.speedRegion }}</span>
@@ -96,7 +94,7 @@ const quickStats = computed(() => {
                 <span class="stat-value">#{{ quickStats.speedServer }}</span>
               </div>
             </div>
-            <div class="card-content" v-else>
+            <div v-else class="card-content">
               <div class="loading-state">
                 <div class="spinner"></div>
                 <span>Chargement...</span>
@@ -188,18 +186,14 @@ const quickStats = computed(() => {
 .dashboard {
   min-height: 100vh;
   background: var(--color-bg);
-  font-family: "Inter", sans-serif;
+  font-family: 'Inter', sans-serif;
   color: var(--color-light);
   padding: 0;
 }
 
 /* === HEADER === */
 .dashboard-header {
-  background: linear-gradient(
-    135deg,
-    var(--color-dark) 0%,
-    var(--color-accent) 100%
-  );
+  background: linear-gradient(135deg, var(--color-dark) 0%, var(--color-accent) 100%);
   border-bottom: 2px solid var(--color-border);
   padding: 24px 32px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -214,7 +208,7 @@ const quickStats = computed(() => {
 }
 
 .header-title h1 {
-  font-family: "Archivo Black", sans-serif;
+  font-family: 'Archivo Black', sans-serif;
   font-size: 32px;
   margin: 0;
   color: var(--color-light);
@@ -248,11 +242,7 @@ const quickStats = computed(() => {
 }
 
 .btn-primary {
-  background: linear-gradient(
-    135deg,
-    var(--color-accent) 0%,
-    var(--color-orange) 100%
-  );
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-orange) 100%);
   color: var(--color-light);
 }
 

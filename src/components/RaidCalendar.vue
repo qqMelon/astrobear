@@ -1,102 +1,102 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed } from 'vue'
 
 const raidEvents = ref([
   {
     start: new Date(2025, 3, 30),
     end: new Date(2025, 3, 30),
-    title: "Liberation Of Undermine - Progression",
-    content: "Rendez-vous à 20h45 sur Discord",
-    type: "progression",
+    title: 'Liberation Of Undermine - Progression',
+    content: 'Rendez-vous à 20h45 sur Discord',
+    type: 'progression',
   },
   {
     start: new Date(2025, 4, 4),
     end: new Date(2025, 4, 4),
-    title: "Liberation Of Undermine - Reroll",
-    content: "Transmo + succès + Gearing rerolls",
-    type: "reroll",
+    title: 'Liberation Of Undermine - Reroll',
+    content: 'Transmo + succès + Gearing rerolls',
+    type: 'reroll',
   },
   {
     start: new Date(2025, 4, 7),
     end: new Date(2025, 4, 7),
-    title: "Nerub-ar Palace - Clear",
-    content: "Clear hebdomadaire + farm stuff",
-    type: "clear",
+    title: 'Nerub-ar Palace - Clear',
+    content: 'Clear hebdomadaire + farm stuff',
+    type: 'clear',
   },
-]);
+])
 
 // Attributs pour v-calendar avec le style harmonisé
 const calendarAttributes = computed(() =>
-  raidEvents.value.map((raid) => ({
+  raidEvents.value.map(raid => ({
     key: raid.title,
     highlight: {
       color: getEventColor(raid.type),
-      fillMode: "light",
+      fillMode: 'light',
     },
     dates: { start: raid.start, end: raid.end },
     popover: {
       label: `${raid.title}`,
-      slot: "event-popover",
+      slot: 'event-popover',
     },
     customData: raid,
-  })),
-);
+  }))
+)
 
 // Couleurs selon le type d'événement
 function getEventColor(type) {
   switch (type) {
-    case "progression":
-      return "orange";
-    case "reroll":
-      return "blue";
-    case "clear":
-      return "green";
+    case 'progression':
+      return 'orange'
+    case 'reroll':
+      return 'blue'
+    case 'clear':
+      return 'green'
     default:
-      return "gray";
+      return 'gray'
   }
 }
 
 // Événements du jour actuel
 const todayEvents = computed(() => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
 
-  return raidEvents.value.filter((event) => {
-    const eventDate = new Date(event.start);
-    eventDate.setHours(0, 0, 0, 0);
-    return eventDate.getTime() === today.getTime();
-  });
-});
+  return raidEvents.value.filter(event => {
+    const eventDate = new Date(event.start)
+    eventDate.setHours(0, 0, 0, 0)
+    return eventDate.getTime() === today.getTime()
+  })
+})
 
 // Prochains événements (7 prochains jours)
 const upcomingEvents = computed(() => {
-  const today = new Date();
-  const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const today = new Date()
+  const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
 
   return raidEvents.value
-    .filter((event) => event.start >= today && event.start <= nextWeek)
+    .filter(event => event.start >= today && event.start <= nextWeek)
     .sort((a, b) => a.start - b.start)
-    .slice(0, 3);
-});
+    .slice(0, 3)
+})
 
 function formatEventDate(date) {
-  return new Intl.DateTimeFormat("fr-FR", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  }).format(date);
+  return new Intl.DateTimeFormat('fr-FR', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  }).format(date)
 }
 
 function getEventTypeIcon(type) {
   switch (type) {
-    case "progression":
-      return "⚔️";
-    case "reroll":
-      return "🎭";
-    case "clear":
-      return "🏆";
+    case 'progression':
+      return '⚔️'
+    case 'reroll':
+      return '🎭'
+    case 'clear':
+      return '🏆'
     default:
-      return "📅";
+      return '📅'
   }
 }
 </script>
@@ -147,15 +147,9 @@ function getEventTypeIcon(type) {
         <!-- Slot pour les popovers personnalisés -->
         <template #day-popover="{ day, attributes }">
           <div class="custom-popover">
-            <div
-              v-for="attr in attributes"
-              :key="attr.key"
-              class="popover-event"
-            >
+            <div v-for="attr in attributes" :key="attr.key" class="popover-event">
               <div class="popover-header">
-                <span class="popover-icon">{{
-                  getEventTypeIcon(attr.customData.type)
-                }}</span>
+                <span class="popover-icon">{{ getEventTypeIcon(attr.customData.type) }}</span>
                 <span class="popover-title">{{ attr.customData.title }}</span>
               </div>
               <p class="popover-content">{{ attr.customData.content }}</p>

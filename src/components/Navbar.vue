@@ -1,53 +1,53 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import { useAuthStore } from "../stores/auth";
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 
-const auth = useAuthStore();
-const router = useRouter();
-const route = useRoute();
+const auth = useAuthStore()
+const router = useRouter()
+const route = useRoute()
 
-const user = auth.user;
-const beurl = import.meta.env.VITE_BACKEND_BASE_URL;
-const showMobile = ref(false);
-const showUserMenu = ref(false);
-const isScrolled = ref(false);
+const user = auth.user
+const beurl = import.meta.env.VITE_BACKEND_BASE_URL
+const showMobile = ref(false)
+const showUserMenu = ref(false)
+const isScrolled = ref(false)
 
-const defaultAvatar = "https://via.placeholder.com/40x40.png?text=👤";
+const defaultAvatar = 'https://via.placeholder.com/40x40.png?text=👤'
 
 // Gestion du scroll pour effet glassmorphism
 function handleScroll() {
-  isScrolled.value = window.scrollY > 20;
+  isScrolled.value = window.scrollY > 20
 }
 
 onMounted(() => {
-  window.addEventListener("scroll", handleScroll);
-});
+  window.addEventListener('scroll', handleScroll)
+})
 
 onUnmounted(() => {
-  window.removeEventListener("scroll", handleScroll);
-});
+  window.removeEventListener('scroll', handleScroll)
+})
 
 function toggleMobileMenu() {
-  showMobile.value = !showMobile.value;
-  showUserMenu.value = false;
+  showMobile.value = !showMobile.value
+  showUserMenu.value = false
 }
 
 function toggleUserMenu() {
-  showUserMenu.value = !showUserMenu.value;
-  showMobile.value = false;
+  showUserMenu.value = !showUserMenu.value
+  showMobile.value = false
 }
 
 function logout() {
-  auth.logout();
-  router.push("/login");
-  showUserMenu.value = false;
+  auth.logout()
+  router.push('/login')
+  showUserMenu.value = false
 }
 
 // Fermer les menus quand on clique ailleurs
 function closeMenus() {
-  showMobile.value = false;
-  showUserMenu.value = false;
+  showMobile.value = false
+  showUserMenu.value = false
 }
 </script>
 
@@ -58,11 +58,7 @@ function closeMenus() {
       <div class="navbar-brand">
         <router-link to="/dashboard" class="brand-link" @click="closeMenus">
           <div class="brand-logo">
-            <img
-              src="@/assets/logo-sabotache.png"
-              alt="Team Sabotache"
-              class="logo-image"
-            />
+            <img src="@/assets/logo-sabotache.png" alt="Team Sabotache" class="logo-image" />
           </div>
           <div class="brand-text">
             <span class="brand-name">Team Sabotache</span>
@@ -74,7 +70,7 @@ function closeMenus() {
       <!-- Navigation principale (Desktop) -->
 
       <!-- User menu (Desktop) -->
-      <div class="navbar-user" v-if="user">
+      <div v-if="user" class="navbar-user">
         <button class="user-button" @click="toggleUserMenu">
           <div class="user-info">
             <span class="user-name">{{ user.first_name }}</span>
@@ -102,10 +98,7 @@ function closeMenus() {
         </button>
 
         <!-- Dropdown menu -->
-        <div
-          class="user-dropdown"
-          :class="{ 'user-dropdown-open': showUserMenu }"
-        >
+        <div class="user-dropdown" :class="{ 'user-dropdown-open': showUserMenu }">
           <div class="dropdown-header">
             <img
               :src="`${beurl}/assets/${user.avatar}` || defaultAvatar"
@@ -113,26 +106,15 @@ function closeMenus() {
               class="dropdown-avatar"
             />
             <div class="dropdown-user-info">
-              <span class="dropdown-name"
-                >{{ user.first_name }} {{ user.last_name }}</span
-              >
+              <span class="dropdown-name">{{ user.first_name }} {{ user.last_name }}</span>
               <span class="dropdown-email">membre@teamsabotache.com</span>
             </div>
           </div>
 
           <div class="dropdown-divider"></div>
 
-          <router-link
-            to="/user-settings"
-            class="dropdown-item"
-            @click="closeMenus"
-          >
-            <svg
-              class="dropdown-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
+          <router-link to="/user-settings" class="dropdown-item" @click="closeMenus">
+            <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -150,12 +132,7 @@ function closeMenus() {
           </router-link>
 
           <router-link to="/help" class="dropdown-item" @click="closeMenus">
-            <svg
-              class="dropdown-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
+            <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -169,12 +146,7 @@ function closeMenus() {
           <div class="dropdown-divider"></div>
 
           <button class="dropdown-item logout-item" @click="logout">
-            <svg
-              class="dropdown-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
+            <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -203,13 +175,7 @@ function closeMenus() {
             d="M4 6h16M4 12h16M4 18h16"
           />
         </svg>
-        <svg
-          v-else
-          class="mobile-icon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
+        <svg v-else class="mobile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -229,12 +195,7 @@ function closeMenus() {
           :class="{ 'mobile-nav-link-active': route.name === 'dashboard' }"
           @click="closeMenus"
         >
-          <svg
-            class="mobile-nav-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-          >
+          <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -251,12 +212,7 @@ function closeMenus() {
           :class="{ 'mobile-nav-link-active': route.name === 'user-profile' }"
           @click="closeMenus"
         >
-          <svg
-            class="mobile-nav-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-          >
+          <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -273,12 +229,7 @@ function closeMenus() {
           :class="{ 'mobile-nav-link-active': route.name === 'raids' }"
           @click="closeMenus"
         >
-          <svg
-            class="mobile-nav-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-          >
+          <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -290,7 +241,7 @@ function closeMenus() {
         </router-link>
       </div>
 
-      <div class="mobile-user" v-if="user">
+      <div v-if="user" class="mobile-user">
         <div class="mobile-user-info">
           <img
             :src="`${beurl}/assets/${user.avatar}` || defaultAvatar"
@@ -298,26 +249,15 @@ function closeMenus() {
             class="mobile-user-avatar"
           />
           <div class="mobile-user-details">
-            <span class="mobile-user-name"
-              >{{ user.first_name }} {{ user.last_name }}</span
-            >
+            <span class="mobile-user-name">{{ user.first_name }} {{ user.last_name }}</span>
             <span class="mobile-user-email">membre@teamsabotache.com</span>
           </div>
         </div>
 
         <div class="mobile-divider"></div>
 
-        <router-link
-          to="/user-settings"
-          class="mobile-nav-link"
-          @click="closeMenus"
-        >
-          <svg
-            class="mobile-nav-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-          >
+        <router-link to="/user-settings" class="mobile-nav-link" @click="closeMenus">
+          <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -335,12 +275,7 @@ function closeMenus() {
         </router-link>
 
         <button class="mobile-nav-link logout-mobile" @click="logout">
-          <svg
-            class="mobile-nav-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-          >
+          <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -354,11 +289,7 @@ function closeMenus() {
     </div>
 
     <!-- Overlay pour fermer les menus -->
-    <div
-      v-if="showMobile || showUserMenu"
-      class="menu-overlay"
-      @click="closeMenus"
-    ></div>
+    <div v-if="showMobile || showUserMenu" class="menu-overlay" @click="closeMenus"></div>
   </nav>
 </template>
 
@@ -438,7 +369,7 @@ function closeMenus() {
 }
 
 .brand-name {
-  font-family: "Archivo Black", sans-serif;
+  font-family: 'Archivo Black', sans-serif;
   font-size: 20px;
   font-weight: bold;
   color: var(--color-light);
