@@ -1,43 +1,39 @@
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "../stores/auth";
-import { useToastStore } from "@/stores/toast";
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
+import { useToastStore } from '@/stores/toast'
 
-const email = ref("john@doe.com");
-const password = ref("test");
-const error = ref(false);
-const router = useRouter();
-const auth = useAuthStore();
-const toastStore = useToastStore();
+const email = ref('john@doe.com')
+const password = ref('test')
+const error = ref(false)
+const router = useRouter()
+const auth = useAuthStore()
+const toastStore = useToastStore()
 
 const handleLogin = async () => {
-  error.value = false;
-  const success = await auth.login(email.value, password.value);
+  error.value = false
+  const success = await auth.login(email.value, password.value)
   if (success) {
-    toastStore.show("Connexion réussie ! Bienvenue 👋", "success");
-    router.push("/dashboard");
+    toastStore.show('Connexion réussie ! Bienvenue 👋', 'success')
+    router.push('/dashboard')
   } else {
-    toastStore.show("Identifiants incorrects 😕", "danger");
-    error.value = true;
+    toastStore.show('Identifiants incorrects 😕', 'danger')
+    error.value = true
   }
-};
+}
 </script>
 
 <template>
   <main class="login-container">
     <section class="login-wrapper">
       <header class="login-header">
-        <img
-          src="@/assets/logo-sabotache.png"
-          alt="Sabotache Logo"
-          class="logo"
-        />
+        <img src="@/assets/logo-sabotache.png" alt="Sabotache Logo" class="logo" />
         <h1 class="login-title">Connexion</h1>
         <p class="login-subtitle">Connectez-vous à votre compte</p>
       </header>
 
-      <form @submit.prevent="handleLogin" class="login-form">
+      <form class="login-form" @submit.prevent="handleLogin">
         <fieldset class="form-fields">
           <legend class="sr-only">Informations de connexion</legend>
 
@@ -86,25 +82,11 @@ const handleLogin = async () => {
           :disabled="isLoading"
         >
           <span v-if="!isLoading">Se connecter</span>
-          <span
-            v-else
-            class="loading-spinner"
-            aria-label="Connexion en cours"
-          ></span>
+          <span v-else class="loading-spinner" aria-label="Connexion en cours"></span>
         </button>
 
-        <output
-          v-if="error"
-          class="error-message"
-          role="alert"
-          aria-live="polite"
-        >
-          <svg
-            class="error-icon"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-          >
+        <output v-if="error" class="error-message" role="alert" aria-live="polite">
+          <svg class="error-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path
               fill-rule="evenodd"
               d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -136,13 +118,9 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(
-    135deg,
-    var(--color-accent) 0%,
-    var(--color-dark) 100%
-  );
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-dark) 100%);
   padding: 20px;
-  font-family: "Inter", sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .login-wrapper {
@@ -178,7 +156,7 @@ main {
 }
 
 .login-title {
-  font-family: "Archivo Black", sans-serif;
+  font-family: 'Archivo Black', sans-serif;
   font-size: 28px;
   font-weight: bold;
   color: var(--color-light);
@@ -288,11 +266,7 @@ main {
 
 .login-button {
   height: 48px;
-  background: linear-gradient(
-    135deg,
-    var(--color-accent) 0%,
-    var(--color-orange) 100%
-  );
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-orange) 100%);
   color: var(--color-light);
   border: none;
   border-radius: 8px;
@@ -311,11 +285,7 @@ main {
 .login-button:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(249, 131, 58, 0.4);
-  background: linear-gradient(
-    135deg,
-    var(--color-orange) 0%,
-    var(--color-accent) 100%
-  );
+  background: linear-gradient(135deg, var(--color-orange) 0%, var(--color-accent) 100%);
 }
 
 .login-button:active:not(:disabled) {
