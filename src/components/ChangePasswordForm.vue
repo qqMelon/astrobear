@@ -47,20 +47,20 @@ async function submitPasswordChange() {
   <div class="uk-text-center uk-container">
     <h3 class="uk-card-title uk-text-center">Changer mon mot de passe</h3>
 
-    <form @submit.prevent="submitPasswordChange" class="uk-form-stacked">
+    <form class="uk-form-stacked" @submit.prevent="submitPasswordChange">
       <div class="uk-margin">
         <label class="uk-form-label">Ancien mot de passe</label>
-        <input class="uk-input" type="password" v-model="currentPassword" required />
+        <input v-model="currentPassword" class="uk-input" type="password" required />
       </div>
 
       <div class="uk-margin">
         <label class="uk-form-label">Nouveau mot de passe</label>
-        <input class="uk-input" type="password" v-model="newPassword" required />
+        <input v-model="newPassword" class="uk-input" type="password" required />
       </div>
 
       <div class="uk-margin">
         <label class="uk-form-label">Confirmer le mot de passe</label>
-        <input class="uk-input" type="password" v-model="confirmPassword" required />
+        <input v-model="confirmPassword" class="uk-input" type="password" required />
       </div>
 
       <div class="uk-margin uk-text-center">
