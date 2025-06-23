@@ -18,7 +18,7 @@ onMounted(async () => {
   try {
     const res = await axios.post(
       import.meta.env.VITE_BACKEND_BASE_URL + '/functions/link-discord',
-      { code },
+      { code }
     )
 
     if (!res.ok) {
