@@ -1,35 +1,33 @@
 <script setup>
-import { onMounted, computed } from "vue";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { useGuildStore } from "@/stores/guild";
+import { onMounted, computed } from 'vue'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale'
+import { useGuildStore } from '@/stores/guild'
 
-const guildStore = useGuildStore();
+const guildStore = useGuildStore()
 
 onMounted(async () => {
-  guildStore.fetchAllData();
-});
+  guildStore.fetchAllData()
+})
 
 // Computed pour le formatage de la date
 const formattedKillDate = computed(() => {
-  if (!guildStore.lastEncounter?.killedAtTimestamp) return null;
-  return format(
-    new Date(guildStore.lastEncounter.killedAtTimestamp),
-    "dd MMMM yyyy à HH:mm",
-    { locale: fr },
-  );
-});
+  if (!guildStore.lastEncounter?.killedAtTimestamp) return null
+  return format(new Date(guildStore.lastEncounter.killedAtTimestamp), 'dd MMMM yyyy à HH:mm', {
+    locale: fr,
+  })
+})
 
 // Computed pour le statut du boss
 const isFinished = computed(() => {
-  return guildStore.lastEncounter?.status === "finished";
-});
+  return guildStore.lastEncounter?.status === 'finished'
+})
 
 // Computed pour le pourcentage de vie restante
 const healthPercent = computed(() => {
-  if (!guildStore.lastEncounter?.bestPercent) return 0;
-  return Math.max(0, 100 - guildStore.lastEncounter.bestPercent);
-});
+  if (!guildStore.lastEncounter?.bestPercent) return 0
+  return Math.max(0, 100 - guildStore.lastEncounter.bestPercent)
+})
 </script>
 
 <template>
@@ -56,25 +54,16 @@ const healthPercent = computed(() => {
           <!-- Health Bar (si pas fini) -->
           <div v-if="!isFinished" class="health-bar-container">
             <div class="health-bar">
-              <div
-                class="health-fill"
-                :style="{ width: `${healthPercent}%` }"
-              ></div>
+              <div class="health-fill" :style="{ width: `${healthPercent}%` }"></div>
               <span class="health-text"
-                >{{ guildStore.lastEncounter.bestPercent }}% de vie
-                restante</span
+                >{{ guildStore.lastEncounter.bestPercent }}% de vie restante</span
               >
             </div>
           </div>
 
           <!-- Badge Finished -->
           <div v-else class="finished-badge">
-            <svg
-              class="finished-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
+            <svg class="finished-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -91,7 +80,7 @@ const healthPercent = computed(() => {
       <div class="boss-info">
         <div class="boss-header">
           <div class="boss-title">
-            <h2>{{ guildStore.lastEncounter.name || "Boss Inconnu" }}</h2>
+            <h2>{{ guildStore.lastEncounter.name || 'Boss Inconnu' }}</h2>
             <div
               class="boss-status"
               :class="{
@@ -100,7 +89,7 @@ const healthPercent = computed(() => {
               }"
             >
               <div class="status-indicator"></div>
-              <span>{{ isFinished ? "Terminé" : "En Cours" }}</span>
+              <span>{{ isFinished ? 'Terminé' : 'En Cours' }}</span>
             </div>
           </div>
         </div>
@@ -115,12 +104,7 @@ const healthPercent = computed(() => {
                 'icon-progress': !isFinished,
               }"
             >
-              <svg
-                v-if="isFinished"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
+              <svg v-if="isFinished" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -138,15 +122,9 @@ const healthPercent = computed(() => {
               </svg>
             </div>
             <div class="stat-content">
-              <span class="stat-label">{{
-                isFinished ? "Vaincu le" : "Meilleur Pull"
-              }}</span>
+              <span class="stat-label">{{ isFinished ? 'Vaincu le' : 'Meilleur Pull' }}</span>
               <span class="stat-value">
-                {{
-                  isFinished
-                    ? formattedKillDate
-                    : `${guildStore.lastEncounter.bestPercent}%`
-                }}
+                {{ isFinished ? formattedKillDate : `${guildStore.lastEncounter.bestPercent}%` }}
               </span>
             </div>
           </div>
@@ -165,9 +143,7 @@ const healthPercent = computed(() => {
             </div>
             <div class="stat-content">
               <span class="stat-label">Tentatives</span>
-              <span class="stat-value">{{
-                guildStore.lastEncounter.pullCount
-              }}</span>
+              <span class="stat-value">{{ guildStore.lastEncounter.pullCount }}</span>
             </div>
           </div>
 
@@ -388,7 +364,7 @@ const healthPercent = computed(() => {
 }
 
 .boss-title h2 {
-  font-family: "Archivo Black", sans-serif;
+  font-family: 'Archivo Black', sans-serif;
   font-size: 26px; /* Légèrement plus grand */
   margin: 0;
   color: var(--color-light);
