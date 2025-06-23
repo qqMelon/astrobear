@@ -29,7 +29,7 @@ export const useAuthStore = defineStore('auth', {
         `${API_URL}/users/me?fields=id,first_name,last_name,email,role.name,avatar`,
         {
           headers: { Authorization: `Bearer ${this.token}` },
-        },
+        }
       )
       this.user = res.data.data
     },
