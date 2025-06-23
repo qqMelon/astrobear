@@ -1,47 +1,51 @@
 /* === Couleurs inspirées du logo Team Sabotache === */
 :root {
-    --color-bg: #1b0f0f;
-    --color-dark: #2B1B18;
-    --color-accent: #8B3A2F;
-    --color-orange: #F9833A;
-    --color-light: #F5E0B9;
-    --color-green: #7C8A4E;
-    --color-danger: #ef4444;
-    --color-border: #3e2b28;
-    --color-white: #ffffff;
-    --color-gray: #888888;
+  --color-bg: #1b0f0f;
+  --color-dark: #2b1b18;
+  --color-accent: #8b3a2f;
+  --color-orange: #f9833a;
+  --color-light: #f5e0b9;
+  --color-green: #7c8a4e;
+  --color-danger: #ef4444;
+  --color-border: #3e2b28;
+  --color-white: #ffffff;
+  --color-gray: #888888;
 }
 
 /* === Typographies === */
 main {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--color-bg);
-    color: var(--color-light);
-    line-height: 1.6;
-    margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-light);
+  line-height: 1.6;
+  margin: 0;
 }
 
-h1, h2, h3, h4, h5 {
-    font-family: 'Archivo Black', sans-serif;
-    font-weight: bold;
-    color: var(--color-light);
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: 'Archivo Black', sans-serif;
+  font-weight: bold;
+  color: var(--color-light);
 }
 
 /* === Utilitaires === */
 .text-center {
-    text-align: center;
+  text-align: center;
 }
 
 .bg-dark {
-    background-color: var(--color-dark);
+  background-color: var(--color-dark);
 }
 
 .btn-accent {
-    background-color: var(--color-accent);
-    color: var(--color-light);
+  background-color: var(--color-accent);
+  color: var(--color-light);
 }
 
 .btn-accent:hover {
-    background-color: var(--color-orange);
-    color: var(--color-dark);
+  background-color: var(--color-orange);
+  color: var(--color-dark);
 }
