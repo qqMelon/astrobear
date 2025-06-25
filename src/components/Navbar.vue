@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
@@ -15,12 +15,35 @@ const isScrolled = ref(false)
 
 const defaultAvatar = 'https://via.placeholder.com/40x40.png?text=👤'
 
+const userAvatar = ref(defaultAvatar)
+
+async function fetchAvatar() {
+  if (!user.avatar || !auth.token) return
+
+  try {
+    const response = await fetch(`${beurl}/assets/${user.avatar}`, {
+      headers: {
+        Authorization: `Bearer ${auth.token}`,
+      },
+    })
+
+    if (!response.ok) throw new Error('Erreur chargement avatar')
+
+    const blob = await response.blob()
+    userAvatar.value = URL.createObjectURL(blob)
+  } catch (err) {
+    console.error('Erreur chargement avatar: ', err)
+    userAvatar.value = defaultAvatar
+  }
+}
+
 // Gestion du scroll pour effet glassmorphism
 function handleScroll() {
   isScrolled.value = window.scrollY > 20
 }
 
 onMounted(() => {
+  fetchAvatar()
   window.addEventListener('scroll', handleScroll)
 })
 
@@ -76,11 +99,7 @@ function closeMenus() {
             <span class="user-name">{{ user.first_name }}</span>
             <span class="user-role">Membre</span>
           </div>
-          <img
-            :src="`${beurl}/assets/${user.avatar}` || defaultAvatar"
-            :alt="user.first_name"
-            class="user-avatar"
-          />
+          <img :src="userAvatar" :alt="user.first_name" class="user-avatar" />
           <svg
             class="chevron-icon"
             :class="{ 'chevron-rotated': showUserMenu }"
@@ -100,11 +119,7 @@ function closeMenus() {
         <!-- Dropdown menu -->
         <div class="user-dropdown" :class="{ 'user-dropdown-open': showUserMenu }">
           <div class="dropdown-header">
-            <img
-              :src="`${beurl}/assets/${user.avatar}` || defaultAvatar"
-              :alt="user.first_name"
-              class="dropdown-avatar"
-            />
+            <img :src="userAvatar" :alt="user.first_name" class="dropdown-avatar" />
             <div class="dropdown-user-info">
               <span class="dropdown-name">{{ user.first_name }} {{ user.last_name }}</span>
               <span class="dropdown-email">membre@teamsabotache.com</span>
@@ -243,11 +258,7 @@ function closeMenus() {
 
       <div v-if="user" class="mobile-user">
         <div class="mobile-user-info">
-          <img
-            :src="`${beurl}/assets/${user.avatar}` || defaultAvatar"
-            :alt="user.first_name"
-            class="mobile-user-avatar"
-          />
+          <img :src="userAvatar" :alt="user.first_name" class="mobile-user-avatar" />
           <div class="mobile-user-details">
             <span class="mobile-user-name">{{ user.first_name }} {{ user.last_name }}</span>
             <span class="mobile-user-email">membre@teamsabotache.com</span>
