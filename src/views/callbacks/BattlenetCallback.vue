@@ -1,10 +1,9 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useToastStore } from '../stores/toast'
+import { useToastStore } from '@/stores/toast'
 
 const route = useRoute()
-const router = useRouter()
 const toast = useToastStore()
 
 onMounted(async () => {
@@ -16,8 +15,8 @@ onMounted(async () => {
   }
 
   try {
-    const token = localStorage.getItem('access_token')
-    const res = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/hooks/battlenet-link', {
+    const token = localStorage.getItem('astrobear-user-token')
+    const res = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/server/battlenet-link', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -25,6 +24,8 @@ onMounted(async () => {
       },
       body: JSON.stringify({ code }),
     })
+
+    console.log('Test check token bnet: ', res)
 
     if (!res.ok) {
       const err = await res.json()
@@ -34,8 +35,6 @@ onMounted(async () => {
     toast.show('Compte Battle.net lié avec succès !', 'success')
   } catch (e) {
     toast.show(e.message, 'danger')
-  } finally {
-    router.push('/profile')
   }
 })
 </script>
