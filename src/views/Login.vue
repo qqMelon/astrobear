@@ -7,12 +7,15 @@ import { useToastStore } from '@/stores/toast'
 const email = ref('john@doe.com')
 const password = ref('test')
 const error = ref(false)
+const isLoading = ref(false)
 const router = useRouter()
 const auth = useAuthStore()
 const toastStore = useToastStore()
 
 const handleLogin = async () => {
   error.value = false
+  isLoading.value = true
+
   const success = await auth.login(email.value, password.value)
   if (success) {
     toastStore.show('Connexion réussie ! Bienvenue 👋', 'success')
@@ -21,6 +24,8 @@ const handleLogin = async () => {
     toastStore.show('Identifiants incorrects 😕', 'danger')
     error.value = true
   }
+
+  isLoading.value = false
 }
 </script>
 
@@ -30,7 +35,7 @@ const handleLogin = async () => {
       <header class="login-header">
         <img src="@/assets/logo-sabotache.png" alt="Sabotache Logo" class="logo" />
         <h1 class="login-title">Connexion</h1>
-        <p class="login-subtitle">Connectez-vous à votre compte</p>
+        <p class="login-subtitle">Accès réservé aux membres de la guilde</p>
       </header>
 
       <form class="login-form" @submit.prevent="handleLogin">
@@ -97,12 +102,7 @@ const handleLogin = async () => {
         </output>
       </form>
 
-      <footer class="login-footer">
-        <p>
-          Pas encore de compte ?
-          <a href="#" class="register-link">Créer un compte</a>
-        </p>
-      </footer>
+      <!-- Section "Créer un compte" supprimée -->
     </section>
   </main>
 </template>
@@ -124,7 +124,7 @@ main {
 }
 
 .login-wrapper {
-  background: rgba(43, 27, 24, 0.95); /* Couleur dark avec transparence */
+  background: rgba(43, 27, 24, 0.95);
   border: 2px solid var(--color-border);
   border-radius: 16px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
@@ -325,30 +325,7 @@ main {
   flex-shrink: 0;
 }
 
-.login-footer {
-  text-align: center;
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid var(--color-border);
-}
-
-.login-footer p {
-  color: var(--color-gray);
-  font-size: 14px;
-  margin: 0;
-}
-
-.register-link {
-  color: var(--color-orange);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.register-link:hover {
-  color: var(--color-light);
-  text-decoration: underline;
-}
+/* Suppression des styles .login-footer, .register-link qui ne sont plus utilisés */
 
 /* Animations */
 @keyframes float {
