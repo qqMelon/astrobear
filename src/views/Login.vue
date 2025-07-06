@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useToastStore } from '@/stores/toast'
+import BaseInput from '@/components/ui/BaseInput.vue'
 
 const email = ref('john@doe.com')
 const password = ref('test')
@@ -42,33 +43,25 @@ const handleLogin = async () => {
         <fieldset class="form-fields">
           <legend class="sr-only">Informations de connexion</legend>
 
-          <section class="form-group">
-            <label for="email" class="form-label">Adresse e-mail</label>
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              class="form-input"
-              :class="{ 'form-input--error': error }"
-              placeholder="votre@email.com"
-              required
-              autocomplete="email"
-            />
-          </section>
+          <BaseInput
+            v-model="email"
+            label="Adresse e-mail"
+            type="email"
+            placeholder="votre@email.com"
+            :error="error"
+            :required="true"
+            autocomplete="email"
+          />
 
-          <section class="form-group">
-            <label for="password" class="form-label">Mot de passe</label>
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              class="form-input"
-              :class="{ 'form-input--error': error }"
-              placeholder="Entrez votre mot de passe"
-              required
-              autocomplete="current-password"
-            />
-          </section>
+          <BaseInput
+            v-model="password"
+            label="Mot de passe"
+            type="password"
+            placeholder="Entrez votre mot de passe"
+            :error="error"
+            :required="true"
+            autocomplete="current-password"
+          />
         </fieldset>
 
         <aside class="form-options">
@@ -101,14 +94,12 @@ const handleLogin = async () => {
           Identifiants incorrects. Veuillez réessayer.
         </output>
       </form>
-
-      <!-- Section "Créer un compte" supprimée -->
     </section>
   </main>
 </template>
 
 <style scoped>
-/* Reset pour éviter les problèmes de box-sizing */
+/* Styles simplifiés - les styles des inputs sont maintenant dans BaseInput */
 * {
   box-sizing: border-box;
 }
@@ -183,51 +174,6 @@ main {
   display: flex;
   flex-direction: column;
   gap: 20px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-}
-
-.form-label {
-  font-weight: 600;
-  color: var(--color-light);
-  font-size: 14px;
-}
-
-.form-input {
-  height: 48px;
-  padding: 0 16px;
-  border: 2px solid var(--color-border);
-  border-radius: 8px;
-  font-size: 16px;
-  transition: all 0.2s ease;
-  background: rgba(245, 224, 185, 0.1);
-  color: var(--color-light);
-  width: 100%;
-}
-
-.form-input::placeholder {
-  color: var(--color-gray);
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: var(--color-orange);
-  box-shadow: 0 0 0 3px rgba(249, 131, 58, 0.2);
-  background: rgba(245, 224, 185, 0.15);
-}
-
-.form-input--error {
-  border-color: var(--color-danger);
-}
-
-.form-input--error:focus {
-  border-color: var(--color-danger);
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
 }
 
 .form-options {
@@ -325,7 +271,17 @@ main {
   flex-shrink: 0;
 }
 
-/* Suppression des styles .login-footer, .register-link qui ne sont plus utilisés */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 /* Animations */
 @keyframes float {
@@ -342,19 +298,6 @@ main {
   to {
     transform: rotate(360deg);
   }
-}
-
-/* Utility classes */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
 }
 
 /* Responsive Design */
@@ -381,16 +324,6 @@ main {
     flex-direction: column;
     gap: 12px;
     align-items: flex-start;
-  }
-}
-
-@media (max-width: 360px) {
-  .form-input {
-    font-size: 14px;
-  }
-
-  .login-button {
-    font-size: 16px;
   }
 }
 </style>
