@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
 
 // État local pour les champs
 const currentPassword = ref('')
@@ -96,15 +97,9 @@ const handleSubmit = async () => {
       />
     </div>
 
-    <button
-      type="submit"
-      class="submit-button"
-      :disabled="isLoading"
-      :class="{ 'submit-button--loading': isLoading }"
-    >
-      <span v-if="!isLoading">Changer le mot de passe</span>
-      <span v-else class="loading-spinner" aria-label="Changement en cours"></span>
-    </button>
+    <BaseButton type="submit" variant="primary" :loading="isLoading" :full-width="true">
+      Changer le mot de passe
+    </BaseButton>
   </form>
 </template>
 
