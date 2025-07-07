@@ -16,7 +16,7 @@ onMounted(async () => {
 
   try {
     const token = localStorage.getItem('astrobear-user-token')
-    const res = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/server/battlenet-link', {
+    const res = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/battlenet-link', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -25,7 +25,7 @@ onMounted(async () => {
       body: JSON.stringify({ code }),
     })
 
-    console.log('Test check token bnet: ', res)
+    console.log('Test check token bnet: ', await res.json())
 
     if (!res.ok) {
       const err = await res.json()
