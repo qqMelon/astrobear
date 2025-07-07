@@ -1,16 +1,73 @@
 <script setup>
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { useGuildStore } from '@/stores/guild'
+import { getLatestReleases } from '@/services/github'
 
 import BaseCard from '@/components/ui/BaseCard.vue'
-import Articles from '@/components/Articles.vue'
+import BaseArticles from '@/components/ui/BaseArticles.vue'
 import ProgressCard from '@/components/ProgressCard.vue'
 import RaidCalendar from '@/components/RaidCalendar.vue'
 
 const guildStore = useGuildStore()
+const articles = ref([])
 
 onMounted(async () => {
-  guildStore.fetchAllData()
+  await guildStore.fetchAllData()
+
+  // Articles de démonstration pour tester l'affichage
+  const demoArticles = [
+    {
+      title: "Nouvelle mise à jour de l'interface !",
+      date: '2025-01-15',
+      body: `# Nouvelle interface utilisateur
+
+Nous avons complètement repensé l'interface pour une **meilleure expérience utilisateur**.
+
+## Nouveautés :
+- Design moderne et responsive
+- Navigation améliorée
+- Thème sombre optimisé
+- Intégration Discord améliorée
+
+*Profitez de toutes ces nouveautés dès maintenant !*`,
+      isGithubRelease: false,
+    },
+    {
+      title: 'Calendrier des raids M+ saison 1',
+      date: '2025-01-10',
+      body: `La nouvelle saison des **Mythic+ est lancée** ! 
+
+Rejoignez-nous pour nos sessions hebdomadaires :
+- **Mardi 20h** : M+ progression
+- **Jeudi 20h** : M+ farming
+- **Samedi 19h** : M+ détente
+
+Objectif : Keystone Master pour tous ! 🏆`,
+      isGithubRelease: false,
+    },
+    {
+      title: 'Recrutement : Tank & Heal',
+      date: '2025-01-05',
+      body: `## 🔍 On recrute !
+
+La guilde **Team Sabotâche** recherche :
+
+- **1 Tank** (DK/Warrior de préférence)
+- **1 Heal** (Priest/Paladin)
+
+**Profil recherché :**
+- Disponible raids 20h-23h
+- Expérience M15+ minimum
+- Bonne ambiance garantie ! 😊
+
+Contactez un officier en jeu !`,
+      isGithubRelease: false,
+    },
+  ]
+
+  // Toujours utiliser les articles de démo pour le debug
+  articles.value = demoArticles
+  console.log('Articles chargés dans Dashboard:', articles.value)
 })
 
 // Computed pour les stats rapides
@@ -105,7 +162,7 @@ const quickStats = computed(() => {
         </div>
       </section>
 
-      <!-- Articles Section avec BaseCard -->
+      <!-- BaseArticles Section -->
       <section class="grid-item articles-section">
         <BaseCard padding="none">
           <div class="section-header">
@@ -125,8 +182,13 @@ const quickStats = computed(() => {
             <button class="btn-secondary">Voir tout</button>
           </div>
           <div class="section-content">
-            <!-- Placeholder pour Articles -->
-            <div class="articles-placeholder">
+            <BaseArticles
+              v-if="articles.length > 0"
+              :articles="articles"
+              variant="default"
+              :show-meta="false"
+            />
+            <div v-else class="articles-placeholder">
               <div class="placeholder-item">
                 <div class="placeholder-avatar"></div>
                 <div class="placeholder-content">
@@ -149,7 +211,6 @@ const quickStats = computed(() => {
                 </div>
               </div>
             </div>
-            <!-- <Articles /> -->
           </div>
         </BaseCard>
       </section>
@@ -444,6 +505,25 @@ const quickStats = computed(() => {
   animation: shimmer 1.5s infinite;
 }
 
+/* === OVERRIDE POUR DASHBOARD === */
+.section-content :deep(.base-articles .articles-list) {
+  gap: 16px; /* Espacement plus serré pour le dashboard */
+}
+
+.section-content :deep(.base-articles .article-card) {
+  border: none; /* Pas de bordure supplémentaire car déjà dans BaseCard */
+  background: rgba(245, 224, 185, 0.03);
+  border-radius: 8px;
+}
+
+.section-content :deep(.base-articles .article-title) {
+  font-size: 18px; /* Titre plus petit pour le dashboard */
+}
+
+.section-content :deep(.base-articles .article-footer) {
+  padding-top: 12px; /* Padding plus petit */
+}
+
 /* === ANIMATIONS === */
 @keyframes spin {
   to {
@@ -503,6 +583,10 @@ const quickStats = computed(() => {
     flex-direction: column;
     gap: 12px;
     align-items: flex-start;
+  }
+
+  .section-content :deep(.base-articles .article-title) {
+    font-size: 16px; /* Encore plus petit sur mobile */
   }
 }
 
