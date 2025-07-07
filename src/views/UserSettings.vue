@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useAuthStore } from '../stores/auth'
 
+import BaseCard from '@/components/ui/BaseCard.vue'
 import Modal from '@/components/Modal.vue'
 import ChangePasswordForm from '@/components/ChangePasswordForm.vue'
 import LinkBattlenetForm from '@/components/LinkBattlenetForm.vue'
@@ -91,7 +92,7 @@ function getAvatarUrl(fileId) {
       <section class="settings-content">
         <div class="settings-grid">
           <!-- Account Security Card -->
-          <div class="settings-card security-card">
+          <BaseCard variant="hover" padding="none" class="security-card">
             <div class="card-header">
               <div class="card-icon security-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -135,10 +136,10 @@ function getAvatarUrl(fileId) {
                 </div>
               </button>
             </div>
-          </div>
+          </BaseCard>
 
           <!-- Integrations Card -->
-          <div class="settings-card integrations-card">
+          <BaseCard variant="hover" padding="none" class="integrations-card">
             <div class="card-header">
               <div class="card-icon integrations-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -202,10 +203,10 @@ function getAvatarUrl(fileId) {
                 </div>
               </button>
             </div>
-          </div>
+          </BaseCard>
 
           <!-- Danger Zone Card -->
-          <div class="settings-card danger-card">
+          <BaseCard variant="hover" padding="none" class="danger-card">
             <div class="card-header">
               <div class="card-icon danger-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -249,7 +250,7 @@ function getAvatarUrl(fileId) {
                 </div>
               </button>
             </div>
-          </div>
+          </BaseCard>
         </div>
       </section>
     </section>
@@ -398,22 +399,7 @@ function getAvatarUrl(fileId) {
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
 }
 
-/* === CARDS === */
-.settings-card {
-  background: rgba(43, 27, 24, 0.8);
-  border: 2px solid var(--color-border);
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-}
-
-.settings-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-}
-
+/* === CARDS - Supprimé les styles de base car maintenant géré par BaseCard === */
 .security-card:hover {
   border-color: var(--color-green);
 }
