@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useToastStore } from '@/stores/toast'
 
 const route = useRoute()
