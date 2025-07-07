@@ -3,16 +3,21 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useToastStore } from '@/stores/toast'
+import BaseInput from '@/components/ui/BaseInput.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
 
 const email = ref('john@doe.com')
 const password = ref('test')
 const error = ref(false)
+const isLoading = ref(false)
 const router = useRouter()
 const auth = useAuthStore()
 const toastStore = useToastStore()
 
 const handleLogin = async () => {
   error.value = false
+  isLoading.value = true
+
   const success = await auth.login(email.value, password.value)
   if (success) {
     toastStore.show('Connexion réussie ! Bienvenue 👋', 'success')
@@ -21,6 +26,8 @@ const handleLogin = async () => {
     toastStore.show('Identifiants incorrects 😕', 'danger')
     error.value = true
   }
+
+  isLoading.value = false
 }
 </script>
 
@@ -30,40 +37,32 @@ const handleLogin = async () => {
       <header class="login-header">
         <img src="@/assets/logo-sabotache.png" alt="Sabotache Logo" class="logo" />
         <h1 class="login-title">Connexion</h1>
-        <p class="login-subtitle">Connectez-vous à votre compte</p>
+        <p class="login-subtitle">Accès réservé aux membres de la guilde</p>
       </header>
 
       <form class="login-form" @submit.prevent="handleLogin">
         <fieldset class="form-fields">
           <legend class="sr-only">Informations de connexion</legend>
 
-          <section class="form-group">
-            <label for="email" class="form-label">Adresse e-mail</label>
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              class="form-input"
-              :class="{ 'form-input--error': error }"
-              placeholder="votre@email.com"
-              required
-              autocomplete="email"
-            />
-          </section>
+          <BaseInput
+            v-model="email"
+            label="Adresse e-mail"
+            type="email"
+            placeholder="votre@email.com"
+            :error="error"
+            :required="true"
+            autocomplete="email"
+          />
 
-          <section class="form-group">
-            <label for="password" class="form-label">Mot de passe</label>
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              class="form-input"
-              :class="{ 'form-input--error': error }"
-              placeholder="Entrez votre mot de passe"
-              required
-              autocomplete="current-password"
-            />
-          </section>
+          <BaseInput
+            v-model="password"
+            label="Mot de passe"
+            type="password"
+            placeholder="Entrez votre mot de passe"
+            :error="error"
+            :required="true"
+            autocomplete="current-password"
+          />
         </fieldset>
 
         <aside class="form-options">
@@ -75,15 +74,15 @@ const handleLogin = async () => {
           <a href="#" class="forgot-password">Mot de passe oublié ?</a>
         </aside>
 
-        <button
+        <BaseButton
           type="submit"
-          class="login-button"
-          :class="{ 'login-button--loading': isLoading }"
-          :disabled="isLoading"
+          variant="primary"
+          size="large"
+          :loading="isLoading"
+          :full-width="true"
         >
-          <span v-if="!isLoading">Se connecter</span>
-          <span v-else class="loading-spinner" aria-label="Connexion en cours"></span>
-        </button>
+          Se connecter
+        </BaseButton>
 
         <output v-if="error" class="error-message" role="alert" aria-live="polite">
           <svg class="error-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -96,19 +95,11 @@ const handleLogin = async () => {
           Identifiants incorrects. Veuillez réessayer.
         </output>
       </form>
-
-      <footer class="login-footer">
-        <p>
-          Pas encore de compte ?
-          <a href="#" class="register-link">Créer un compte</a>
-        </p>
-      </footer>
     </section>
   </main>
 </template>
 
 <style scoped>
-/* Reset pour éviter les problèmes de box-sizing */
 * {
   box-sizing: border-box;
 }
@@ -124,7 +115,7 @@ main {
 }
 
 .login-wrapper {
-  background: rgba(43, 27, 24, 0.95); /* Couleur dark avec transparence */
+  background: rgba(43, 27, 24, 0.95);
   border: 2px solid var(--color-border);
   border-radius: 16px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
@@ -185,51 +176,6 @@ main {
   gap: 20px;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-}
-
-.form-label {
-  font-weight: 600;
-  color: var(--color-light);
-  font-size: 14px;
-}
-
-.form-input {
-  height: 48px;
-  padding: 0 16px;
-  border: 2px solid var(--color-border);
-  border-radius: 8px;
-  font-size: 16px;
-  transition: all 0.2s ease;
-  background: rgba(245, 224, 185, 0.1);
-  color: var(--color-light);
-  width: 100%;
-}
-
-.form-input::placeholder {
-  color: var(--color-gray);
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: var(--color-orange);
-  box-shadow: 0 0 0 3px rgba(249, 131, 58, 0.2);
-  background: rgba(245, 224, 185, 0.15);
-}
-
-.form-input--error {
-  border-color: var(--color-danger);
-}
-
-.form-input--error:focus {
-  border-color: var(--color-danger);
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
-}
-
 .form-options {
   display: flex;
   justify-content: space-between;
@@ -264,48 +210,6 @@ main {
   text-decoration: underline;
 }
 
-.login-button {
-  height: 48px;
-  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-orange) 100%);
-  color: var(--color-light);
-  border: none;
-  border-radius: 8px;
-  font-size: 18px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 8px;
-  width: 100%;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.login-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(249, 131, 58, 0.4);
-  background: linear-gradient(135deg, var(--color-orange) 0%, var(--color-accent) 100%);
-}
-
-.login-button:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.login-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.loading-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(245, 224, 185, 0.3);
-  border-radius: 50%;
-  border-top-color: var(--color-light);
-  animation: spin 1s ease-in-out infinite;
-}
-
 .error-message {
   display: flex;
   align-items: center;
@@ -325,29 +229,16 @@ main {
   flex-shrink: 0;
 }
 
-.login-footer {
-  text-align: center;
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid var(--color-border);
-}
-
-.login-footer p {
-  color: var(--color-gray);
-  font-size: 14px;
-  margin: 0;
-}
-
-.register-link {
-  color: var(--color-orange);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.register-link:hover {
-  color: var(--color-light);
-  text-decoration: underline;
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Animations */
@@ -359,25 +250,6 @@ main {
   50% {
     transform: translateY(-6px) rotate(1deg);
   }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Utility classes */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
 }
 
 /* Responsive Design */
@@ -404,16 +276,6 @@ main {
     flex-direction: column;
     gap: 12px;
     align-items: flex-start;
-  }
-}
-
-@media (max-width: 360px) {
-  .form-input {
-    font-size: 14px;
-  }
-
-  .login-button {
-    font-size: 16px;
   }
 }
 </style>

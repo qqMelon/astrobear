@@ -1,15 +1,73 @@
 <script setup>
-import { onMounted, computed, ref, watch } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { useGuildStore } from '@/stores/guild'
+import { getLatestReleases } from '@/services/github'
 
-import Articles from '@/components/Articles.vue'
+import BaseCard from '@/components/ui/BaseCard.vue'
+import BaseArticles from '@/components/ui/BaseArticles.vue'
 import ProgressCard from '@/components/ProgressCard.vue'
 import RaidCalendar from '@/components/RaidCalendar.vue'
 
 const guildStore = useGuildStore()
+const articles = ref([])
 
 onMounted(async () => {
-  guildStore.fetchAllData()
+  await guildStore.fetchAllData()
+
+  // Articles de démonstration pour tester l'affichage
+  const demoArticles = [
+    {
+      title: "Nouvelle mise à jour de l'interface !",
+      date: '2025-01-15',
+      body: `# Nouvelle interface utilisateur
+
+Nous avons complètement repensé l'interface pour une **meilleure expérience utilisateur**.
+
+## Nouveautés :
+- Design moderne et responsive
+- Navigation améliorée
+- Thème sombre optimisé
+- Intégration Discord améliorée
+
+*Profitez de toutes ces nouveautés dès maintenant !*`,
+      isGithubRelease: false,
+    },
+    {
+      title: 'Calendrier des raids M+ saison 1',
+      date: '2025-01-10',
+      body: `La nouvelle saison des **Mythic+ est lancée** ! 
+
+Rejoignez-nous pour nos sessions hebdomadaires :
+- **Mardi 20h** : M+ progression
+- **Jeudi 20h** : M+ farming
+- **Samedi 19h** : M+ détente
+
+Objectif : Keystone Master pour tous ! 🏆`,
+      isGithubRelease: false,
+    },
+    {
+      title: 'Recrutement : Tank & Heal',
+      date: '2025-01-05',
+      body: `## 🔍 On recrute !
+
+La guilde **Team Sabotâche** recherche :
+
+- **1 Tank** (DK/Warrior de préférence)
+- **1 Heal** (Priest/Paladin)
+
+**Profil recherché :**
+- Disponible raids 20h-23h
+- Expérience M15+ minimum
+- Bonne ambiance garantie ! 😊
+
+Contactez un officier en jeu !`,
+      isGithubRelease: false,
+    },
+  ]
+
+  // Toujours utiliser les articles de démo pour le debug
+  articles.value = demoArticles
+  console.log('Articles chargés dans Dashboard:', articles.value)
 })
 
 // Computed pour les stats rapides
@@ -36,8 +94,8 @@ const quickStats = computed(() => {
       <!-- Stats Cards -->
       <section class="grid-item stats-cards">
         <div class="cards-row">
-          <!-- Card Progression -->
-          <div class="stat-card progression-card">
+          <!-- Card Progression avec BaseCard -->
+          <BaseCard variant="hover" padding="default">
             <div class="card-header">
               <div class="card-icon progress-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -67,10 +125,10 @@ const quickStats = computed(() => {
                 <span>Chargement...</span>
               </div>
             </div>
-          </div>
+          </BaseCard>
 
-          <!-- Card Vitesse -->
-          <div class="stat-card speed-card">
+          <!-- Card Vitesse avec BaseCard -->
+          <BaseCard variant="hover" padding="default">
             <div class="card-header">
               <div class="card-icon speed-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -100,13 +158,13 @@ const quickStats = computed(() => {
                 <span>Chargement...</span>
               </div>
             </div>
-          </div>
+          </BaseCard>
         </div>
       </section>
 
-      <!-- Articles Section -->
+      <!-- BaseArticles Section -->
       <section class="grid-item articles-section">
-        <div class="section-card">
+        <BaseCard padding="none">
           <div class="section-header">
             <div class="section-title">
               <div class="section-icon">
@@ -124,8 +182,13 @@ const quickStats = computed(() => {
             <button class="btn-secondary">Voir tout</button>
           </div>
           <div class="section-content">
-            <!-- Placeholder pour Articles -->
-            <div class="articles-placeholder">
+            <BaseArticles
+              v-if="articles.length > 0"
+              :articles="articles"
+              variant="default"
+              :show-meta="false"
+            />
+            <div v-else class="articles-placeholder">
               <div class="placeholder-item">
                 <div class="placeholder-avatar"></div>
                 <div class="placeholder-content">
@@ -148,14 +211,13 @@ const quickStats = computed(() => {
                 </div>
               </div>
             </div>
-            <!-- <Articles /> -->
           </div>
-        </div>
+        </BaseCard>
       </section>
 
-      <!-- Calendar Section -->
+      <!-- Calendar Section avec BaseCard -->
       <section class="grid-item calendar-section">
-        <div class="section-card">
+        <BaseCard padding="none">
           <div class="section-header">
             <div class="section-title">
               <div class="section-icon">
@@ -175,7 +237,7 @@ const quickStats = computed(() => {
           <div class="section-content">
             <RaidCalendar />
           </div>
-        </div>
+        </BaseCard>
       </section>
     </div>
   </main>
@@ -189,82 +251,6 @@ const quickStats = computed(() => {
   font-family: 'Inter', sans-serif;
   color: var(--color-light);
   padding: 0;
-}
-
-/* === HEADER === */
-.dashboard-header {
-  background: linear-gradient(135deg, var(--color-dark) 0%, var(--color-accent) 100%);
-  border-bottom: 2px solid var(--color-border);
-  padding: 24px 32px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.header-title h1 {
-  font-family: 'Archivo Black', sans-serif;
-  font-size: 32px;
-  margin: 0;
-  color: var(--color-light);
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.header-title p {
-  margin: 4px 0 0 0;
-  color: var(--color-gray);
-  font-size: 16px;
-}
-
-.header-actions {
-  display: flex;
-  gap: 12px;
-}
-
-/* === BOUTONS === */
-.btn-primary,
-.btn-secondary {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 14px;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-orange) 100%);
-  color: var(--color-light);
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(249, 131, 58, 0.4);
-}
-
-.btn-secondary {
-  background: rgba(245, 224, 185, 0.1);
-  color: var(--color-light);
-  border: 1px solid var(--color-border);
-}
-
-.btn-secondary:hover {
-  background: rgba(249, 131, 58, 0.2);
-  border-color: var(--color-orange);
-}
-
-.icon {
-  width: 16px;
-  height: 16px;
 }
 
 /* === GRID DASHBOARD === */
@@ -311,21 +297,7 @@ const quickStats = computed(() => {
   margin-top: 5px;
 }
 
-.stat-card {
-  background: rgba(43, 27, 24, 0.8);
-  border: 2px solid var(--color-border);
-  border-radius: 12px;
-  padding: 24px;
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-  border-color: var(--color-orange);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
-}
-
+/* === CONTENU DES CARTES === */
 .card-header {
   display: flex;
   align-items: center;
@@ -392,16 +364,6 @@ const quickStats = computed(() => {
 }
 
 /* === SECTIONS PRINCIPALES === */
-.section-card {
-  background: rgba(43, 27, 24, 0.8);
-  border: 2px solid var(--color-border);
-  border-radius: 12px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  backdrop-filter: blur(10px);
-}
-
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -439,9 +401,29 @@ const quickStats = computed(() => {
 }
 
 .section-content {
-  flex: 1;
   padding: 24px;
-  overflow: auto;
+}
+
+/* === BOUTONS === */
+.btn-secondary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  background: rgba(245, 224, 185, 0.1);
+  color: var(--color-light);
+  border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+  background: rgba(249, 131, 58, 0.2);
+  border-color: var(--color-orange);
 }
 
 /* === LOADING & PLACEHOLDERS === */
@@ -523,6 +505,25 @@ const quickStats = computed(() => {
   animation: shimmer 1.5s infinite;
 }
 
+/* === OVERRIDE POUR DASHBOARD === */
+.section-content :deep(.base-articles .articles-list) {
+  gap: 16px; /* Espacement plus serré pour le dashboard */
+}
+
+.section-content :deep(.base-articles .article-card) {
+  border: none; /* Pas de bordure supplémentaire car déjà dans BaseCard */
+  background: rgba(245, 224, 185, 0.03);
+  border-radius: 8px;
+}
+
+.section-content :deep(.base-articles .article-title) {
+  font-size: 18px; /* Titre plus petit pour le dashboard */
+}
+
+.section-content :deep(.base-articles .article-footer) {
+  padding-top: 12px; /* Padding plus petit */
+}
+
 /* === ANIMATIONS === */
 @keyframes spin {
   to {
@@ -569,20 +570,6 @@ const quickStats = computed(() => {
 }
 
 @media (max-width: 768px) {
-  .dashboard-header {
-    padding: 16px 20px;
-  }
-
-  .header-content {
-    flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
-  }
-
-  .header-title h1 {
-    font-size: 24px;
-  }
-
   .dashboard-grid {
     padding: 20px;
     gap: 16px;
@@ -597,19 +584,14 @@ const quickStats = computed(() => {
     gap: 12px;
     align-items: flex-start;
   }
+
+  .section-content :deep(.base-articles .article-title) {
+    font-size: 16px; /* Encore plus petit sur mobile */
+  }
 }
 
 @media (max-width: 480px) {
   .dashboard-grid {
-    padding: 16px;
-  }
-
-  .stat-card,
-  .section-card {
-    padding: 16px;
-  }
-
-  .section-content {
     padding: 16px;
   }
 }
