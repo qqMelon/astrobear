@@ -1,4 +1,7 @@
 <script setup>
+import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseInput from '@/components/ui/BaseInput.vue'
+
 const emit = defineEmits(['close'])
 
 const clientId = import.meta.env.VITE_BATTLENET_CLIENT_ID
@@ -140,28 +143,21 @@ const battleNetAuthUrl = `https://oauth.battle.net/authorize?client_id=${clientI
       </div>
 
       <!-- Actions -->
-      <div class="form-actions">
-        <a :href="battleNetAuthUrl" class="btn btn-primary battlenet-btn">
-          <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
-            <path
-              d="M18.5 12c0-2.04-.84-3.88-2.19-5.2L14 9.13c.8.58 1.32 1.52 1.32 2.58 0 1.77-1.43 3.2-3.2 3.2s-3.2-1.43-3.2-3.2c0-1.06.52-2 1.32-2.58L7.93 6.8C6.58 8.12 5.74 9.96 5.74 12c0 3.59 2.91 6.5 6.5 6.5s6.5-2.91 6.5-6.5z"
-            />
-          </svg>
-          Se connecter avec Battle.net
-        </a>
-
-        <button type="button" class="btn btn-secondary" @click="emit('close')">
-          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-          Plus tard
-        </button>
+      <div class="form-fields">
+        <BaseInput
+          v-model="battletag"
+          label="BattleTag"
+          type="text"
+          placeholder="VotreNom#1234"
+          :error="!!error"
+          :error-message="error"
+          :required="true"
+        />
       </div>
+
+      <BaseButton type="submit" variant="battlenet" :loading="isLoading" :full-width="true">
+        Lier le compte
+      </BaseButton>
     </div>
   </div>
 </template>
