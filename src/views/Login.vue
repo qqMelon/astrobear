@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useToastStore } from '@/stores/toast'
 import BaseInput from '@/components/ui/BaseInput.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
 
 const email = ref('john@doe.com')
 const password = ref('test')
@@ -73,15 +74,15 @@ const handleLogin = async () => {
           <a href="#" class="forgot-password">Mot de passe oublié ?</a>
         </aside>
 
-        <button
+        <BaseButton
           type="submit"
-          class="login-button"
-          :class="{ 'login-button--loading': isLoading }"
-          :disabled="isLoading"
+          variant="primary"
+          size="large"
+          :loading="isLoading"
+          :full-width="true"
         >
-          <span v-if="!isLoading">Se connecter</span>
-          <span v-else class="loading-spinner" aria-label="Connexion en cours"></span>
-        </button>
+          Se connecter
+        </BaseButton>
 
         <output v-if="error" class="error-message" role="alert" aria-live="polite">
           <svg class="error-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -99,7 +100,6 @@ const handleLogin = async () => {
 </template>
 
 <style scoped>
-/* Styles simplifiés - les styles des inputs sont maintenant dans BaseInput */
 * {
   box-sizing: border-box;
 }
@@ -210,48 +210,6 @@ main {
   text-decoration: underline;
 }
 
-.login-button {
-  height: 48px;
-  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-orange) 100%);
-  color: var(--color-light);
-  border: none;
-  border-radius: 8px;
-  font-size: 18px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 8px;
-  width: 100%;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.login-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(249, 131, 58, 0.4);
-  background: linear-gradient(135deg, var(--color-orange) 0%, var(--color-accent) 100%);
-}
-
-.login-button:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.login-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.loading-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(245, 224, 185, 0.3);
-  border-radius: 50%;
-  border-top-color: var(--color-light);
-  animation: spin 1s ease-in-out infinite;
-}
-
 .error-message {
   display: flex;
   align-items: center;
@@ -291,12 +249,6 @@ main {
   }
   50% {
     transform: translateY(-6px) rotate(1deg);
-  }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
   }
 }
 
