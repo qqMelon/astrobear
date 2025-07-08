@@ -57,6 +57,11 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
+    {
+      path: '/help',
+      name: 'helps',
+      component: () => import('./../views/Help.vue'),
+    },
   ],
 })
 
