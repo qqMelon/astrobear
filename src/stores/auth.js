@@ -34,6 +34,10 @@ export const useAuthStore = defineStore('auth', {
       this.user = res.data.data
     },
 
+    setProfilePicture(blobPicture) {
+      this.user.pp = blobPicture
+    },
+
     logout() {
       this.user = null
       this.token = ''

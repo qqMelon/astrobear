@@ -31,6 +31,7 @@ async function fetchAvatar() {
 
     const blob = await response.blob()
     userAvatar.value = URL.createObjectURL(blob)
+    auth.setProfilePicture(userAvatar.value)
   } catch (err) {
     console.error('Erreur chargement avatar: ', err)
     userAvatar.value = defaultAvatar

@@ -38,10 +38,6 @@ function openModal(type) {
   modalContent.value = type
   showModal.value = true
 }
-
-function getAvatarUrl(fileId) {
-  return import.meta.env.VITE_BACKEND_BASE_URL + `/assets/${fileId}`
-}
 </script>
 
 <template>
@@ -51,12 +47,7 @@ function getAvatarUrl(fileId) {
       <header class="settings-header">
         <div class="header-content">
           <div class="user-avatar">
-            <img
-              v-if="user?.avatar"
-              :src="getAvatarUrl(user.avatar)"
-              alt="Avatar"
-              class="avatar-image"
-            />
+            <img v-if="user?.pp" :src="user.pp" alt="Avatar" class="avatar-image" />
             <div v-else class="avatar-placeholder">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path
