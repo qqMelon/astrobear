@@ -1,8 +1,6 @@
 <script setup>
 import BaseButton from '@/components/ui/BaseButton.vue'
 
-const emit = defineEmits(['close'])
-
 const clientId = import.meta.env.VITE_BATTLENET_CLIENT_ID
 const redirectUri = encodeURIComponent(import.meta.env.VITE_BATTLENET_REDIRECT_URI)
 const battleNetAuthUrl = `https://oauth.battle.net/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&state=astro&response_type=code&scope=wow.profile`

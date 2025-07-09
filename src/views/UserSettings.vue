@@ -1,6 +1,8 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth'
+
+import { getValidBattlenetToken } from '@/helpers/battlenetToken'
 
 import BaseCard from '@/components/ui/BaseCard.vue'
 import Modal from '@/components/Modal.vue'
@@ -11,6 +13,8 @@ import DeleteAccountForm from '@/components/DeleteAccountForm.vue'
 
 const authStore = useAuthStore()
 const user = authStore.user
+
+const bnetLinked = ref(false)
 
 const showModal = ref(false)
 const modalContent = ref('')
@@ -38,6 +42,13 @@ function openModal(type) {
   modalContent.value = type
   showModal.value = true
 }
+
+onMounted(() => {
+  const token = getValidBattlenetToken()
+  console.log('test hook mounted on userprofile for bnet token: ', token)
+
+  if (token) bnetLinked.value = true
+})
 </script>
 
 <template>
@@ -179,9 +190,15 @@ function openModal(type) {
                     />
                   </svg>
                 </div>
-                <div class="button-content">
+                <div v-if="!bnetLinked" class="button-content">
                   <span class="button-title">Lier Battle.net</span>
                   <span class="button-subtitle">Connectez votre compte Blizzard</span>
+                </div>
+                <div v-else class="button-content">
+                  <span class="button-title">Vous êtes déjà connecté !</span>
+                  <span class="button-subtitle"
+                    >Une instance de connexion est déjà en cours et est valable 24h</span
+                  >
                 </div>
                 <div class="button-arrow">
                   <svg viewBox="0 0 20 20" fill="currentColor">

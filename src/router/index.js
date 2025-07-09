@@ -34,6 +34,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/user-profile',
+      name: 'user-profile',
+      component: () => import('./../views/UserProfile.vue'),
+      meta: {
+        requiresAuth: true,
+      },
+    },
+    {
       path: '/oauth/callback',
       name: 'battlenet-callback',
       component: () => import('./../views/callbacks/BattlenetCallback.vue'),
