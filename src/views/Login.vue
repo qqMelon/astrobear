@@ -20,10 +20,12 @@ const handleLogin = async () => {
 
   const success = await auth.login(email.value, password.value)
   if (success) {
-    toastStore.show('Connexion réussie ! Bienvenue 👋', 'success')
-    router.push('/dashboard')
+    toastStore.showSuccess('Connexion réussie ! Bienvenue 👋')
+    setTimeout(() => {
+      router.push('/dashboard')
+    }, 1500)
   } else {
-    toastStore.show('Identifiants incorrects 😕', 'danger')
+    toastStore.showError('Identifiants incorrects 😕')
     error.value = true
   }
 

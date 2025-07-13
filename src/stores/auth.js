@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { useToastStore } from '@/stores/toast'
 
 const API_URL = import.meta.env.VITE_BACKEND_BASE_URL
 
@@ -10,16 +11,21 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   actions: {
+    // Dans ta méthode login :
     async login(email, password) {
+      const toastStore = useToastStore()
+
       try {
         const res = await axios.post(`${API_URL}/auth/login`, { email, password })
         this.token = res.data.data.access_token
         localStorage.setItem('astrobear-user-token', this.token)
 
         await this.fetchUser()
+        toastStore.showSuccess('Connexion réussie ! Bienvenue 👋')
         return true
       } catch (err) {
         console.error('login failed: ', err)
+        toastStore.showError(err) // 🎯 Utilise la nouvelle méthode
         return false
       }
     },
