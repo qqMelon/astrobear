@@ -1,3 +1,4 @@
+```vue
 <script setup>
 import { computed, ref, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth'
@@ -39,6 +40,11 @@ const modalComponent = computed(() => {
 })
 
 function openModal(type) {
+  // Empêcher l'ouverture du modal Battle.net si déjà connecté
+  if (type === 'battlenet' && bnetLinked.value) {
+    return
+  }
+
   modalContent.value = type
   showModal.value = true
 }
@@ -182,30 +188,53 @@ onMounted(() => {
                 </div>
               </button>
 
-              <button class="settings-button secondary" @click="openModal('battlenet')">
+              <button
+                class="settings-button secondary"
+                :class="{ connected: bnetLinked }"
+                :disabled="bnetLinked"
+                @click="openModal('battlenet')"
+              >
                 <div class="button-icon battlenet-icon">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
+                  <!-- Icône différente selon l'état -->
+                  <svg v-if="!bnetLinked" viewBox="0 0 24 24" fill="currentColor">
                     <path
                       d="M18.5 12c0-2.04-.84-3.88-2.19-5.2L14 9.13c.8.58 1.32 1.52 1.32 2.58 0 1.77-1.43 3.2-3.2 3.2s-3.2-1.43-3.2-3.2c0-1.06.52-2 1.32-2.58L7.93 6.8C6.58 8.12 5.74 9.96 5.74 12c0 3.59 2.91 6.5 6.5 6.5s6.5-2.91 6.5-6.5z"
                     />
                   </svg>
+                  <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
                 </div>
-                <div v-if="!bnetLinked" class="button-content">
-                  <span class="button-title">Lier Battle.net</span>
-                  <span class="button-subtitle">Connectez votre compte Blizzard</span>
-                </div>
-                <div v-else class="button-content">
-                  <span class="button-title">Vous êtes déjà connecté !</span>
-                  <span class="button-subtitle"
-                    >Une instance de connexion est déjà en cours et est valable 24h</span
-                  >
+                <div class="button-content">
+                  <span v-if="!bnetLinked" class="button-title">Lier Battle.net</span>
+                  <span v-else class="button-title">✅ Battle.net connecté</span>
+
+                  <span v-if="!bnetLinked" class="button-subtitle">
+                    Connectez votre compte Blizzard
+                  </span>
+                  <span v-else class="button-subtitle">
+                    Votre compte Battle.net est déjà lié (valable 24h)
+                  </span>
                 </div>
                 <div class="button-arrow">
-                  <svg viewBox="0 0 20 20" fill="currentColor">
+                  <svg v-if="!bnetLinked" viewBox="0 0 20 20" fill="currentColor">
                     <path
                       fill-rule="evenodd"
                       d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
                       clip-rule="evenodd"
+                    />
+                  </svg>
+                  <svg v-else viewBox="0 0 20 20" fill="none" stroke="currentColor">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"
                     />
                   </svg>
                 </div>
@@ -513,6 +542,35 @@ onMounted(() => {
   border-color: var(--color-danger);
   background: rgba(239, 68, 68, 0.1);
   box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+}
+
+/* === ÉTAT CONNECTÉ === */
+.settings-button.connected {
+  border-color: var(--color-green) !important;
+  background: rgba(124, 138, 78, 0.1) !important;
+  cursor: not-allowed !important;
+  opacity: 0.8;
+}
+
+.settings-button.connected:hover {
+  transform: none !important;
+  box-shadow: 0 4px 16px rgba(124, 138, 78, 0.2) !important;
+}
+
+.settings-button.connected .button-icon {
+  background: rgba(124, 138, 78, 0.2) !important;
+}
+
+.settings-button.connected .button-icon svg {
+  color: var(--color-green) !important;
+}
+
+.settings-button.connected .button-title {
+  color: var(--color-green) !important;
+}
+
+.settings-button.connected .button-arrow svg {
+  color: var(--color-green) !important;
 }
 
 .button-icon {
