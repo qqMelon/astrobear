@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
@@ -7,21 +7,24 @@ const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
-const user = auth.user
+// 🎯 Utilise computed pour la réactivité
+const user = computed(() => auth.user)
 const beurl = import.meta.env.VITE_BACKEND_BASE_URL
 const showMobile = ref(false)
 const showUserMenu = ref(false)
 const isScrolled = ref(false)
 
 const defaultAvatar = 'https://via.placeholder.com/40x40.png?text=👤'
-
 const userAvatar = ref(defaultAvatar)
 
 async function fetchAvatar() {
-  if (!user.avatar || !auth.token) return
+  if (!user.value?.avatar || !auth.token) {
+    userAvatar.value = defaultAvatar
+    return
+  }
 
   try {
-    const response = await fetch(`${beurl}/assets/${user.avatar}`, {
+    const response = await fetch(`${beurl}/assets/${user.value.avatar}`, {
       headers: {
         Authorization: `Bearer ${auth.token}`,
       },
@@ -38,13 +41,23 @@ async function fetchAvatar() {
   }
 }
 
+// 🎯 Watcher pour rafraîchir l'avatar quand l'utilisateur change
+watch(
+  user,
+  newUser => {
+    if (newUser) {
+      fetchAvatar()
+    }
+  },
+  { immediate: true }
+)
+
 // Gestion du scroll pour effet glassmorphism
 function handleScroll() {
   isScrolled.value = window.scrollY > 20
 }
 
 onMounted(() => {
-  fetchAvatar()
   window.addEventListener('scroll', handleScroll)
 })
 
@@ -91,8 +104,6 @@ function closeMenus() {
         </router-link>
       </div>
 
-      <!-- Navigation principale (Desktop) -->
-
       <!-- User menu (Desktop) -->
       <div v-if="user" class="navbar-user">
         <button class="user-button" @click="toggleUserMenu">
@@ -100,7 +111,7 @@ function closeMenus() {
             <span class="user-name">{{ user.first_name }}</span>
             <span class="user-role">Membre</span>
           </div>
-          <img :src="userAvatar" :alt="user.first_name" class="user-avatar" />
+          <img :src="userAvatar" :alt="user.first_name || 'Utilisateur'" class="user-avatar" />
           <svg
             class="chevron-icon"
             :class="{ 'chevron-rotated': showUserMenu }"
@@ -120,7 +131,11 @@ function closeMenus() {
         <!-- Dropdown menu -->
         <div class="user-dropdown" :class="{ 'user-dropdown-open': showUserMenu }">
           <div class="dropdown-header">
-            <img :src="userAvatar" :alt="user.first_name" class="dropdown-avatar" />
+            <img
+              :src="userAvatar"
+              :alt="user.first_name || 'Utilisateur'"
+              class="dropdown-avatar"
+            />
             <div class="dropdown-user-info">
               <span class="dropdown-name">{{ user.first_name }} {{ user.last_name }}</span>
               <span class="dropdown-email">membre@teamsabotache.com</span>
@@ -242,7 +257,11 @@ function closeMenus() {
 
       <div v-if="user" class="mobile-user">
         <div class="mobile-user-info">
-          <img :src="userAvatar" :alt="user.first_name" class="mobile-user-avatar" />
+          <img
+            :src="userAvatar"
+            :alt="user.first_name || 'Utilisateur'"
+            class="mobile-user-avatar"
+          />
           <div class="mobile-user-details">
             <span class="mobile-user-name">{{ user.first_name }} {{ user.last_name }}</span>
             <span class="mobile-user-email">membre@teamsabotache.com</span>
@@ -375,44 +394,6 @@ function closeMenus() {
   font-size: 12px;
   color: var(--color-gray);
   font-weight: 500;
-}
-
-/* === NAVIGATION === */
-.navbar-nav {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.nav-link {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  color: var(--color-gray);
-  text-decoration: none;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 14px;
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-.nav-link:hover {
-  color: var(--color-light);
-  background: rgba(245, 224, 185, 0.1);
-  transform: translateY(-2px);
-}
-
-.nav-link-active {
-  color: var(--color-orange);
-  background: rgba(249, 131, 58, 0.1);
-  border: 1px solid rgba(249, 131, 58, 0.3);
-}
-
-.nav-icon {
-  width: 18px;
-  height: 18px;
 }
 
 /* === USER MENU === */
@@ -721,7 +702,6 @@ function closeMenus() {
     height: 70px;
   }
 
-  .navbar-nav,
   .navbar-user {
     display: none;
   }
