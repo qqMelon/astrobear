@@ -1,7 +1,7 @@
 <script setup>
 import { watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useToastStore } from '../stores/toast'
+import { useToastStore } from '../../stores/toast.js'
 
 const toast = useToastStore()
 const { visible, message, type, duration } = storeToRefs(toast)
@@ -141,7 +141,7 @@ watch(visible, newVisible => {
   height: 16px;
 }
 
-/* === Types de Toast === */
+/* === Types de BaseToast === */
 .toast-success {
   background: rgba(124, 138, 78, 0.95);
   border-color: var(--color-green);

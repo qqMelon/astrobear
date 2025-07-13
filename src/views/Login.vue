@@ -21,9 +21,9 @@ const handleLogin = async () => {
   const success = await auth.login(email.value, password.value)
   if (success) {
     toastStore.showSuccess('Connexion réussie ! Bienvenue 👋')
-    setTimeout(() => {
-      router.push('/dashboard')
-    }, 1500)
+
+    // 🎯 Redirection immédiate sans délai
+    router.push('/dashboard')
   } else {
     toastStore.showError('Identifiants incorrects 😕')
     error.value = true

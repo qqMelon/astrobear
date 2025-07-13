@@ -1,22 +1,31 @@
 <script setup>
-import Toast from '@/components/Toast.vue'
-import Navbar from '@/components/Navbar.vue'
+import { RouterView } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { useRoute } from 'vue-router'
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import BaseToast from '@/components/ui/BaseToast.vue'
+import Navbar from '@/components/Navbar.vue'
 
-const router = useRouter()
+const auth = useAuthStore()
+const route = useRoute()
 
-const onLogin = computed(() => {
-  return router.currentRoute.value.name == 'login' || router.currentRoute.value.path == '/'
+// Afficher la navbar seulement si l'utilisateur est connecté ET n'est pas sur la page login
+const showNavbar = computed(() => {
+  return auth.isAuthenticated() && route.name !== 'login'
 })
 </script>
 
 <template>
-  <Toast />
-  <Navbar v-if="!onLogin" />
-  <RouterView v-slot="{ Component }">
-    <transition name="fade" mode="out-in" appear>
-      <component :is="Component" />
-    </transition>
-  </RouterView>
+  <div id="app">
+    <Navbar v-if="showNavbar" />
+    <RouterView />
+    <BaseToast />
+  </div>
 </template>
+
+<style>
+#app {
+  min-height: 100vh;
+  background: var(--color-dark);
+}
+</style>
