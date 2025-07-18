@@ -5,8 +5,8 @@
     <div class="uk-margin-left">
       <h4 class="uk-margin-remove">{{ character.name }}</h4>
       <p class="uk-margin-remove">
-        Niveau {{ character.level }} – {{ character.playable_class.name.fr_FR }}<br />
-        Serveur : {{ character.realm.name.fr_FR }}
+        Niveau {{ character.level }} – {{ character.class }}<br />
+        Serveur : {{ character.realm }}
       </p>
     </div>
   </div>
