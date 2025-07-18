@@ -7,7 +7,6 @@ import CharacterCard from '@/components/CharacterCard.vue'
 import { getValidBattlenetToken } from '@/helpers/battlenetToken'
 
 const authStore = useAuthStore()
-const authUser = authStore.user
 
 const token = getValidBattlenetToken()
 
@@ -19,7 +18,7 @@ const selectedChar = ref(null)
 const alreadyCalled = ref(false)
 
 const syncCharacters = function () {
-  if (alreadyCalled.value == true) return
+  if (alreadyCalled.value === true) return
   loadChars()
 }
 
@@ -48,9 +47,23 @@ const loadChars = async function () {
     }
 
     const data = await res.json()
-    formatCharactersData(data.wow_accounts[0].characters)
+    const formattedData = data.wow_accounts[0].characters.map((char) => ({
+      char_id: char.id,
+      name: char.name,
+      level: char.level,
+      realm: char.realm.name.fr_FR,
+      class: char.playable_class.name.fr_FR,
+      race: char.playable_race.name.fr_FR,
+      faction: char.faction.name.fr_FR,
+      is_main: false,
+      href: char.character.href,
+      user: authStore.user.id,
+    }))
+
+    await syncToDirectus(formattedData)
+    characters.value = formattedData
   } catch (err) {
-    error.value = err.messgage
+    error.value = err.message
   } finally {
     isLoading.value = false
     alreadyCalled.value = true
@@ -60,30 +73,31 @@ const loadChars = async function () {
   }
 }
 
-const formatCharactersData = function (data) {
-  console.log( 'data received: ', data)
-  const formattedData = data.map((char) => ({
-    char_id: char.id,
-    name: char.name,
-    level: char.level,
-    realm: char.realm.name.fr_FR,
-    class: char.playable_class.name.fr_FR,
-    race: char.playable_race.name.fr_FR,
-    faction: char.faction.name.fr_FR,
-    is_main: false,
-    href: char.character.href,
-    user: authUser.id,
-  }))
+const syncToDirectus = async function (charactersList) {
+  const authToken = authStore.token || localStorage.getItem('astrobear-user-token')
 
-  characters.value = formattedData
+  try {
+    const res = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/items/wow_characters?batch=all', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(charactersList)
+    })
+
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error?.message || 'Erreur Directus')
+    console.log('✅ Personnages synchronisés dans Directus', data)
+  } catch (err) {
+    console.error('❌ Erreur de synchro Directus: ', err)
+  }
 }
 
 const sortedCharacters = computed(() => [...characters.value].sort((a, b) => b.level - a.level))
 
 onMounted(() => {
-  if (token) {
-    bnetLinked.value = true
-  }
+  if (token) bnetLinked.value = true
 })
 </script>
 
@@ -97,7 +111,11 @@ onMounted(() => {
 
     <div v-else>
       <button class="uk-button uk-button-primary" @click="syncCharacters">
-        {{ !alreadyCalled?  'Synchroniser mes personnages' : 'Patientez avant de relancer une synchronisation' }}
+        {{
+          !alreadyCalled
+            ? 'Synchroniser mes personnages'
+            : 'Patientez avant de relancer une synchronisation'
+        }}
       </button>
       <div class="uk-grid-large" uk-grid>
         <!-- Liste des persos -->
