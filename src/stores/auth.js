@@ -8,6 +8,7 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
     token: localStorage.getItem('astrobear-user-token') || '',
+    refreshToken: localStorage.getItem('astrobear-user-refreshToken') ||  '',
   }),
 
   actions: {

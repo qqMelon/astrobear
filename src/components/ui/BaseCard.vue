@@ -1,5 +1,5 @@
 <script setup>
-const props = defineProps({
+defineProps({
   // Variantes basiques
   variant: {
     type: String,

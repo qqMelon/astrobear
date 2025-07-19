@@ -105,6 +105,11 @@ function closeMenus() {
       </div>
 
       <!-- User menu (Desktop) -->
+      <div class="navbar-profile">
+        <button class="profile-button" @click="router.push({ name: 'user-profile' })">
+          Profile
+        </button>
+      </div>
       <div v-if="user" class="navbar-user">
         <button class="user-button" @click="toggleUserMenu">
           <div class="user-info">
@@ -235,23 +240,6 @@ function closeMenus() {
             />
           </svg>
           <span>Dashboard</span>
-        </router-link>
-
-        <router-link
-          to="/user-profile"
-          class="mobile-nav-link"
-          :class="{ 'mobile-nav-link-active': route.name === 'user-profile' }"
-          @click="closeMenus"
-        >
-          <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
-          </svg>
-          <span>Profil</span>
         </router-link>
       </div>
 
