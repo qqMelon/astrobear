@@ -21,8 +21,6 @@ const alreadyCalled = ref(false)
 const syncCharacters = async function () {
   if (alreadyCalled.value === true) return
 
-  console.log('Click to sync chars')
-
   const updateCharList = await pullFromBlizzard()
   const { toCreate, toUpdate } = mergeCharacters(updateCharList, characters.value)
 
@@ -119,7 +117,6 @@ const pullFromBlizzard = async function () {
 }
 
 const syncToDirectus = async function (toCreate, toUpdate) {
-  console.log('Here to sync to Directus: ', toCreate, toUpdate)
   try {
     if (toCreate.length > 0) {
       const resCreate = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/items/wow_characters?batch=all', {
@@ -178,8 +175,6 @@ const uploadToDirectus = async function (charactersList) {
 }
 
 const mergeCharacters = function (blizzardChars, existingChar) {
-  console.log('Merge data : ', blizzardChars, existingChar)
-  console.log('Changes ?? ', blizzardChars == existingChar)
   const toCreate = []
   const toUpdate = []
 
@@ -208,6 +203,45 @@ const mergeCharacters = function (blizzardChars, existingChar) {
 
   return { toCreate, toUpdate }
 }
+
+const setAsMainCharacter = async (char) => {
+  if (!char || !authToken) return
+
+  try {
+    const updates = characters.value.map((c) => ({
+      id: c.id,
+      is_main: c.id === char.id,
+    }))
+
+    const res = await fetch(
+      import.meta.env.VITE_BACKEND_BASE_URL + '/items/wow_characters?batch=all',
+      {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      }
+    )
+
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(err.error?.message || 'Erreur lors de la mise à jour')
+    }
+
+    characters.value = characters.value.map((c) => ({
+      ...c,
+      is_main: c.id === char.id,
+    }))
+    selectedChar.value = { ...char, is_main: true }
+
+    console.log(`✅ ${char.name} est maintenant le personnage principal.`)
+  } catch (err) {
+    console.error('❌ Erreur lors de la définition du personnage principal:', err)
+  }
+}
+
 
 const sortedCharacters = computed(() => [...characters.value].sort((a, b) => b.level - a.level))
 
@@ -244,7 +278,7 @@ onMounted(() => {
               :key="char.char_id"
               :character="char"
               :class=" {
-                'uk-card-primary': selectedChar?.id === char.char_id,
+                'uk-card-primary': selectedChar?.char_id === char.char_id,
               }"
               style="    cursor: pointer"
               @click="selectedChar = char"
@@ -257,13 +291,25 @@ onMounted(() => {
           <transition name="fade">
             <div v-if="selectedChar">
               <h3>Détails du personnage</h3>
-              <div class="uk-card uk-card-default uk-card-body">
+              <div class="uk-card uk-card-default uk-card-body"><div class="uk-card uk-card-default uk-card-body">
                 <p><strong>Nom :</strong> {{ selectedChar.name }}</p>
                 <p><strong>Niveau :</strong> {{ selectedChar.level }}</p>
                 <p><strong>Classe :</strong> {{ selectedChar.class }}</p>
                 <p><strong>Race :</strong> {{ selectedChar.race }}</p>
                 <p><strong>Royaume :</strong> {{ selectedChar.realm }}</p>
+                <p><strong>Statut :</strong>
+                  <span v-if="selectedChar.is_main">Personnage principal ✅</span>
+                </p>
+
+                <button
+                  v-if="!selectedChar.is_main"
+                  class="uk-button uk-button-secondary uk-margin-top"
+                  @click="setAsMainCharacter(selectedChar)"
+                >
+                  Définir comme personnage principal
+                </button>
               </div>
+            </div>
             </div>
             <div v-else>
               <p>Sélectionnez un personnage pour voir les détails.</p>

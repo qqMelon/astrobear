@@ -1,22 +1,26 @@
-<template>
-  <div
-    class="character-card uk-card uk-card-default uk-card-hover uk-flex uk-flex-middle uk-margin"
-  >
-    <div class="uk-margin-left">
-      <h4 class="uk-margin-remove">{{ character.name }}</h4>
-      <p class="uk-margin-remove">
-        Niveau {{ character.level }} – {{ character.class }}<br />
-        Serveur : {{ character.realm }}
-      </p>
-    </div>
-  </div>
-</template>
-
 <script setup>
 defineProps({
   character: Object,
 })
 </script>
+
+<template>
+  <div class="uk-card uk-card-default uk-card-small uk-card-hover uk-padding-small uk-position-relative">
+    <div class="uk-card-body">
+      <h4 class="uk-margin-remove">{{ character.name }}</h4>
+      <p class="uk-margin-remove">Niveau {{ character.level }} - {{ character.class }}</p>
+      <p class="uk-margin-remove">Royaume : {{ character.realm }}</p>
+
+      <span
+        v-if="character.is_main"
+        class="uk-label uk-label-warning uk-position-top-right uk-margin-small"
+        title="Personnage principal"
+      >
+        ⭐ Main
+      </span>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .character-card {
