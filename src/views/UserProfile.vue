@@ -20,7 +20,19 @@ const alreadyCalled = ref(false)
 
 const syncCharacters = async function () {
   if (alreadyCalled.value === true) return
-  console.log('To update')
+
+  console.log('Click to sync chars')
+
+  const updateCharList = await pullFromBlizzard()
+  const { toCreate, toUpdate } = mergeCharacters(updateCharList, characters.value)
+
+  await syncToDirectus(toCreate, toUpdate)
+
+  characters.value = updateCharList
+  alreadyCalled.value = true
+    setTimeout(() => {
+      alreadyCalled.value = false
+    }, 15000)
 }
 
 const loadChars = async function () {
@@ -34,54 +46,15 @@ const loadChars = async function () {
   }
 
   try {
-    let res = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + `/items/wow_characters?filter[user][_eq]=${
-authStore.user.id
-}`, {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      }
-    )
-
-    if (!res.ok) throw new Error('Erreur lors du chargement des personnages depuis Directus.')
-
-    console.log('chars data exist from Directus')
-
-    let data = await res.json()
-
+    const data = await pullFromDirectus()
     if (data.data && data.data.length > 0) {
+      console.log('chars data exist from Directus')
       characters.value = data.data
     } else {
       console.log('chars data doesnt exist, pull from Blizzard API')
-      const res = await fetch(
-        'https://eu.api.blizzard.com/profile/user/wow?namespace=profile-eu&local=fr_FR',
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-
-      if (!res.ok) {
-        throw new Error('Impossible de charger les personnages.')
-      }
-
-      const data = await res.json()
-      const formattedData = data.wow_accounts[0].characters.map((char) => ({
-        char_id: char.id,
-        name: char.name,
-        level: char.level,
-        realm: char.realm.name.fr_FR,
-        class: char.playable_class.name.fr_FR,
-        race: char.playable_race.name.fr_FR,
-        faction: char.faction.name.fr_FR,
-        is_main: false,
-        href: char.character.href,
-        user: authStore.user.id,
-      }))
-
-      await uploadToDirectus(formattedData)
-      characters.value = formattedData
+      const toUpload = await pullFromBlizzard()
+      await uploadToDirectus(toUpload)
+      characters.value = toUpload
     }
   } catch (err) {
     error.value = err.message
@@ -93,6 +66,98 @@ authStore.user.id
     }, 15000)
   }
 }
+
+const pullFromDirectus = async function () {
+  let res = await fetch(
+    import.meta.env.VITE_BACKEND_BASE_URL + `/items/wow_characters?filter[user][_eq]=${authStore.user.id}`, {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    }
+  )
+
+  if (!res.ok) {
+    throw new Error('Erreur lors du chargement des personnages depuis Directus.')
+    return null
+  }
+
+  let data = await res.json()
+
+  return data
+}
+
+const pullFromBlizzard = async function () {
+  const res = await fetch(
+    'https://eu.api.blizzard.com/profile/user/wow?namespace=profile-eu&local=fr_FR',
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  )
+
+  if (!res.ok) {
+    throw new Error('Impossible de charger les personnages.')
+    return null
+  }
+
+  const data = await res.json()
+  const formattedData = data.wow_accounts[0].characters.map((char) => ({
+    char_id: char.id,
+    name: char.name,
+    level: char.level,
+    realm: char.realm.name.fr_FR,
+    class: char.playable_class.name.fr_FR,
+    race: char.playable_race.name.fr_FR,
+    faction: char.faction.name.fr_FR,
+    is_main: false,
+    href: char.character.href,
+    user: authStore.user.id,
+  }))
+
+  return formattedData
+}
+
+const syncToDirectus = async function (toCreate, toUpdate) {
+  console.log('Here to sync to Directus: ', toCreate, toUpdate)
+  try {
+    if (toCreate.length > 0) {
+      const resCreate = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/items/wow_characters?batch=all', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(toCreate)
+      })
+
+      if (!resCreate.ok) {
+        const err = await resCreate.json()
+        throw new Error(err.error?.message || 'Erreur création Directus')
+      }
+    }
+
+    if (toUpdate.length > 0) {
+      const resUpdate = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/items/wow_characters?batch=all', {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(toUpdate)
+      })
+
+      if (!resUpdate.ok) {
+        const err = await resUpdate.json()
+        throw new Error(err.error?.message || 'Erreur mise à jour Directus')
+      }
+    }
+
+  } catch (err) {
+    console.error('❌ Erreur synchro Directus:', err)
+  }
+}
+
 
 const uploadToDirectus = async function (charactersList) {
   try {
@@ -110,6 +175,38 @@ const uploadToDirectus = async function (charactersList) {
   } catch (err) {
     console.error('❌ Erreur de synchro Directus: ', err)
   }
+}
+
+const mergeCharacters = function (blizzardChars, existingChar) {
+  console.log('Merge data : ', blizzardChars, existingChar)
+  console.log('Changes ?? ', blizzardChars == existingChar)
+  const toCreate = []
+  const toUpdate = []
+
+  for (const char of blizzardChars) {
+    const match = existingChar.find((c) => c.char_id === char.char_id)
+
+    if (!match) {
+      toCreate.push(char)
+    } else {
+      const hasChanged = (
+        char.level !== match.level ||
+        char.realm !== match.realm ||
+        char.race !== match.race ||
+        char.name !== match.name
+      )
+
+      if (hasChanged) {
+        toUpdate.push({
+          ...match,
+          ...char,
+          id: match.id
+        })
+      }
+    }
+  }
+
+  return { toCreate, toUpdate }
 }
 
 const sortedCharacters = computed(() => [...characters.value].sort((a, b) => b.level - a.level))
@@ -149,7 +246,7 @@ onMounted(() => {
               :class=" {
                 'uk-card-primary': selectedChar?.id === char.char_id,
               }"
-              style="   cursor: pointer"
+              style="    cursor: pointer"
               @click="selectedChar = char"
             />
           </div>
