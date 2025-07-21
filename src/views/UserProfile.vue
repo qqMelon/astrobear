@@ -1,12 +1,14 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useAuthStore } from '../stores/auth'
+import { useRouter } from 'vue-router'
 
 import CharacterCard from '@/components/CharacterCard.vue'
 
 import { getValidBattlenetToken } from '@/helpers/battlenetToken'
 
 const authStore = useAuthStore()
+const router = useRouter()
 
 const token = getValidBattlenetToken()
 
@@ -28,24 +30,18 @@ const syncCharacters = async function () {
 
   characters.value = updateCharList
   alreadyCalled.value = true
-    setTimeout(() => {
-      alreadyCalled.value = false
-    }, 15000)
+  setTimeout(() => {
+    alreadyCalled.value = false
+  }, 15000)
 }
 
 const loadChars = async function () {
   isLoading.value = true
   error.value = null
 
-  if (!token) {
-    error.value = 'Token Battlenet invalide ou expiré.'
-    isLoading.value = false
-    return
-  }
-
   try {
     const data = await pullFromDirectus()
-    if (data.data && data.data.length > 0) {
+    if ((data.data && data.data.length > 0) || !token) {
       console.log('chars data exist from Directus')
       characters.value = data.data
     } else {
@@ -66,8 +62,12 @@ const loadChars = async function () {
 }
 
 const pullFromDirectus = async function () {
-  let res = await fetch(
-    import.meta.env.VITE_BACKEND_BASE_URL + `/items/wow_characters?filter[user][_eq]=${authStore.user.id}`, {
+  const res = await fetch(
+    import.meta.env.VITE_BACKEND_BASE_URL +
+    `/items/wow_characters?filter[user][_eq]=${
+authStore.user.id
+}`,
+    {
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
@@ -76,12 +76,9 @@ const pullFromDirectus = async function () {
 
   if (!res.ok) {
     throw new Error('Erreur lors du chargement des personnages depuis Directus.')
-    return null
   }
 
-  let data = await res.json()
-
-  return data
+  return await res.json()
 }
 
 const pullFromBlizzard = async function () {
@@ -96,11 +93,10 @@ const pullFromBlizzard = async function () {
 
   if (!res.ok) {
     throw new Error('Impossible de charger les personnages.')
-    return null
   }
 
   const data = await res.json()
-  const formattedData = data.wow_accounts[0].characters.map((char) => ({
+  return data.wow_accounts[0].characters.map(char => ({
     char_id: char.id,
     name: char.name,
     level: char.level,
@@ -112,21 +108,22 @@ const pullFromBlizzard = async function () {
     href: char.character.href,
     user: authStore.user.id,
   }))
-
-  return formattedData
 }
 
 const syncToDirectus = async function (toCreate, toUpdate) {
   try {
     if (toCreate.length > 0) {
-      const resCreate = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/items/wow_characters?batch=all', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(toCreate)
-      })
+      const resCreate = await fetch(
+        import.meta.env.VITE_BACKEND_BASE_URL + '/items/wow_characters?batch=all',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(toCreate),
+        }
+      )
 
       if (!resCreate.ok) {
         const err = await resCreate.json()
@@ -135,37 +132,41 @@ const syncToDirectus = async function (toCreate, toUpdate) {
     }
 
     if (toUpdate.length > 0) {
-      const resUpdate = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/items/wow_characters?batch=all', {
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(toUpdate)
-      })
+      const resUpdate = await fetch(
+        import.meta.env.VITE_BACKEND_BASE_URL + '/items/wow_characters?batch=all',
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(toUpdate),
+        }
+      )
 
       if (!resUpdate.ok) {
         const err = await resUpdate.json()
         throw new Error(err.error?.message || 'Erreur mise à jour Directus')
       }
     }
-
   } catch (err) {
     console.error('❌ Erreur synchro Directus:', err)
   }
 }
 
-
 const uploadToDirectus = async function (charactersList) {
   try {
-    const res = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/items/wow_characters?batch=all', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(charactersList)
-    })
+    const res = await fetch(
+      import.meta.env.VITE_BACKEND_BASE_URL + '/items/wow_characters?batch=all',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(charactersList),
+      }
+    )
 
     const data = await res.json()
     if (!res.ok) throw new Error(data.error?.message || 'Erreur Directus')
@@ -179,23 +180,22 @@ const mergeCharacters = function (blizzardChars, existingChar) {
   const toUpdate = []
 
   for (const char of blizzardChars) {
-    const match = existingChar.find((c) => c.char_id === char.char_id)
+    const match = existingChar.find(c => c.char_id === char.char_id)
 
     if (!match) {
       toCreate.push(char)
     } else {
-      const hasChanged = (
+      const hasChanged =
         char.level !== match.level ||
         char.realm !== match.realm ||
         char.race !== match.race ||
         char.name !== match.name
-      )
 
       if (hasChanged) {
         toUpdate.push({
           ...match,
           ...char,
-          id: match.id
+          id: match.id,
         })
       }
     }
@@ -204,11 +204,11 @@ const mergeCharacters = function (blizzardChars, existingChar) {
   return { toCreate, toUpdate }
 }
 
-const setAsMainCharacter = async (char) => {
+const setAsMainCharacter = async function (char) {
   if (!char || !authToken) return
 
   try {
-    const updates = characters.value.map((c) => ({
+    const updates = characters.value.map(c => ({
       id: c.id,
       is_main: c.id === char.id,
     }))
@@ -230,18 +230,19 @@ const setAsMainCharacter = async (char) => {
       throw new Error(err.error?.message || 'Erreur lors de la mise à jour')
     }
 
-    characters.value = characters.value.map((c) => ({
+    characters.value = characters.value.map(c => ({
       ...c,
       is_main: c.id === char.id,
     }))
     selectedChar.value = { ...char, is_main: true }
 
-    console.log(`✅ ${char.name} est maintenant le personnage principal.`)
+    console.log(`✅ ${
+char.name
+} est maintenant le personnage principal.`)
   } catch (err) {
     console.error('❌ Erreur lors de la définition du personnage principal:', err)
   }
 }
-
 
 const sortedCharacters = computed(() => [...characters.value].sort((a, b) => b.level - a.level))
 
@@ -254,8 +255,9 @@ onMounted(() => {
 <template>
   <main class="uk-container uk-margin-top">
     <div v-if="!bnetLinked">
-      <button class="uk-button uk-button-primary uk-button-disable" @click="syncCharacters">
-        Votre compte n'est pas lié à Battle.net
+      Votre compte n'est pas lié à Battle.net
+      <button class="uk-button uk-button-primary" @click="router.push({ name: 'user-settings' })">
+        Recupéré un jeton Blizzard
       </button>
     </div>
 
@@ -280,7 +282,7 @@ onMounted(() => {
               :class=" {
                 'uk-card-primary': selectedChar?.char_id === char.char_id,
               }"
-              style="    cursor: pointer"
+              style="      cursor: pointer"
               @click="selectedChar = char"
             />
           </div>
@@ -291,25 +293,27 @@ onMounted(() => {
           <transition name="fade">
             <div v-if="selectedChar">
               <h3>Détails du personnage</h3>
-              <div class="uk-card uk-card-default uk-card-body"><div class="uk-card uk-card-default uk-card-body">
-                <p><strong>Nom :</strong> {{ selectedChar.name }}</p>
-                <p><strong>Niveau :</strong> {{ selectedChar.level }}</p>
-                <p><strong>Classe :</strong> {{ selectedChar.class }}</p>
-                <p><strong>Race :</strong> {{ selectedChar.race }}</p>
-                <p><strong>Royaume :</strong> {{ selectedChar.realm }}</p>
-                <p><strong>Statut :</strong>
-                  <span v-if="selectedChar.is_main">Personnage principal ✅</span>
-                </p>
+              <div class="uk-card uk-card-default uk-card-body">
+                <div class="uk-card uk-card-default uk-card-body">
+                  <p><strong>Nom :</strong> {{ selectedChar.name }}</p>
+                  <p><strong>Niveau :</strong> {{ selectedChar.level }}</p>
+                  <p><strong>Classe :</strong> {{ selectedChar.class }}</p>
+                  <p><strong>Race :</strong> {{ selectedChar.race }}</p>
+                  <p><strong>Royaume :</strong> {{ selectedChar.realm }}</p>
+                  <p>
+                    <strong>Statut :</strong>
+                    <span v-if="selectedChar.is_main">Personnage principal ✅</span>
+                  </p>
 
-                <button
-                  v-if="!selectedChar.is_main"
-                  class="uk-button uk-button-secondary uk-margin-top"
-                  @click="setAsMainCharacter(selectedChar)"
-                >
-                  Définir comme personnage principal
-                </button>
+                  <button
+                    v-if="!selectedChar.is_main"
+                    class="uk-button uk-button-secondary uk-margin-top"
+                    @click="setAsMainCharacter(selectedChar)"
+                  >
+                    Définir comme personnage principal
+                  </button>
+                </div>
               </div>
-            </div>
             </div>
             <div v-else>
               <p>Sélectionnez un personnage pour voir les détails.</p>

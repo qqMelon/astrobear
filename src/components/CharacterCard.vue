@@ -5,7 +5,9 @@ defineProps({
 </script>
 
 <template>
-  <div class="uk-card uk-card-default uk-card-small uk-card-hover uk-padding-small uk-position-relative">
+  <div
+    class="uk-card uk-card-default uk-card-small uk-card-hover uk-padding-small uk-position-relative"
+  >
     <div class="uk-card-body">
       <h4 class="uk-margin-remove">{{ character.name }}</h4>
       <p class="uk-margin-remove">Niveau {{ character.level }} - {{ character.class }}</p>

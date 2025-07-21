@@ -6,13 +6,15 @@ import { useToastStore } from '@/stores/toast'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 
-const email = ref('john@doe.com')
-const password = ref('test')
-const error = ref(false)
-const isLoading = ref(false)
 const router = useRouter()
 const auth = useAuthStore()
 const toastStore = useToastStore()
+
+const email = ref('john@doe.com')
+const password = ref('test')
+const keepDataLogin = ref(false)
+const error = ref(false)
+const isLoading = ref(false)
 
 const handleLogin = async () => {
   error.value = false
@@ -21,8 +23,6 @@ const handleLogin = async () => {
   const success = await auth.login(email.value, password.value)
   if (success) {
     toastStore.showSuccess('Connexion réussie ! Bienvenue 👋')
-
-    // 🎯 Redirection immédiate sans délai
     router.push('/dashboard')
   } else {
     toastStore.showError('Identifiants incorrects 😕')
@@ -69,7 +69,7 @@ const handleLogin = async () => {
 
         <aside class="form-options">
           <label class="checkbox-container">
-            <input type="checkbox" class="checkbox" />
+            <input type="checkbox" class="checkbox" value="true" v-model="keepDataLogin" />
             <span class="checkmark"></span>
             Se souvenir de moi
           </label>
