@@ -22,7 +22,6 @@ const handleLogin = async () => {
   if (success) {
     toastStore.showSuccess('Connexion réussie ! Bienvenue 👋')
 
-    // 🎯 Redirection immédiate sans délai
     router.push('/dashboard')
   } else {
     toastStore.showError('Identifiants incorrects 😕')

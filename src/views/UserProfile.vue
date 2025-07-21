@@ -3,13 +3,13 @@ import { ref, onMounted, computed } from 'vue'
 import { useAuthStore } from '../stores/auth'
 
 import CharacterCard from '@/components/CharacterCard.vue'
+import BaseCard from '@/components/ui/BaseCard.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
 
 import { getValidBattlenetToken } from '@/helpers/battlenetToken'
 
 const authStore = useAuthStore()
-
 const token = getValidBattlenetToken()
-
 const authToken = authStore.token || localStorage.getItem('astrobear-user-token')
 const bnetLinked = ref(false)
 const characters = ref([])
@@ -17,6 +17,30 @@ const isLoading = ref(false)
 const error = ref(null)
 const selectedChar = ref(null)
 const alreadyCalled = ref(false)
+
+// Couleurs des classes WoW (même logique que CharacterCard)
+const classColors = {
+  Guerrier: '#C79C6E',
+  Paladin: '#F58CBA',
+  Chasseur: '#ABD473',
+  Voleur: '#FFF569',
+  Prêtre: '#FFFFFF',
+  'Chevalier de la mort': '#C41F3B',
+  Chaman: '#0070DE',
+  Mage: '#69CCF0',
+  Démoniste: '#9482C9',
+  Moine: '#00FF96',
+  Druide: '#FF7D0A',
+  'Chasseur de démons': '#A330C9',
+  Évocateur: '#33937F',
+}
+
+const getClassColor = className => classColors[className] || '#FFFFFF'
+
+const getCharacterAvatar = (character, size = 'avatar') => {
+  if (!character?.name || !character?.realm) return null
+  return `https://render.worldofwarcraft.com/eu/character/${character.realm.toLowerCase().replace(/[^a-z0-9]/g, '')}/${character.name.toLowerCase()}/${size}.jpg`
+}
 
 const syncCharacters = async function () {
   if (alreadyCalled.value === true) return
@@ -28,9 +52,9 @@ const syncCharacters = async function () {
 
   characters.value = updateCharList
   alreadyCalled.value = true
-    setTimeout(() => {
-      alreadyCalled.value = false
-    }, 15000)
+  setTimeout(() => {
+    alreadyCalled.value = false
+  }, 15000)
 }
 
 const loadChars = async function () {
@@ -66,8 +90,10 @@ const loadChars = async function () {
 }
 
 const pullFromDirectus = async function () {
-  let res = await fetch(
-    import.meta.env.VITE_BACKEND_BASE_URL + `/items/wow_characters?filter[user][_eq]=${authStore.user.id}`, {
+  const res = await fetch(
+    import.meta.env.VITE_BACKEND_BASE_URL +
+      `/items/wow_characters?filter[user][_eq]=${authStore.user.id}`,
+    {
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
@@ -79,7 +105,7 @@ const pullFromDirectus = async function () {
     return null
   }
 
-  let data = await res.json()
+  const data = await res.json()
 
   return data
 }
@@ -100,7 +126,7 @@ const pullFromBlizzard = async function () {
   }
 
   const data = await res.json()
-  const formattedData = data.wow_accounts[0].characters.map((char) => ({
+  const formattedData = data.wow_accounts[0].characters.map(char => ({
     char_id: char.id,
     name: char.name,
     level: char.level,
@@ -119,14 +145,17 @@ const pullFromBlizzard = async function () {
 const syncToDirectus = async function (toCreate, toUpdate) {
   try {
     if (toCreate.length > 0) {
-      const resCreate = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/items/wow_characters?batch=all', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(toCreate)
-      })
+      const resCreate = await fetch(
+        import.meta.env.VITE_BACKEND_BASE_URL + '/items/wow_characters?batch=all',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(toCreate),
+        }
+      )
 
       if (!resCreate.ok) {
         const err = await resCreate.json()
@@ -135,37 +164,41 @@ const syncToDirectus = async function (toCreate, toUpdate) {
     }
 
     if (toUpdate.length > 0) {
-      const resUpdate = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/items/wow_characters?batch=all', {
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(toUpdate)
-      })
+      const resUpdate = await fetch(
+        import.meta.env.VITE_BACKEND_BASE_URL + '/items/wow_characters?batch=all',
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(toUpdate),
+        }
+      )
 
       if (!resUpdate.ok) {
         const err = await resUpdate.json()
         throw new Error(err.error?.message || 'Erreur mise à jour Directus')
       }
     }
-
   } catch (err) {
     console.error('❌ Erreur synchro Directus:', err)
   }
 }
 
-
 const uploadToDirectus = async function (charactersList) {
   try {
-    const res = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/items/wow_characters?batch=all', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(charactersList)
-    })
+    const res = await fetch(
+      import.meta.env.VITE_BACKEND_BASE_URL + '/items/wow_characters?batch=all',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(charactersList),
+      }
+    )
 
     const data = await res.json()
     if (!res.ok) throw new Error(data.error?.message || 'Erreur Directus')
@@ -179,23 +212,22 @@ const mergeCharacters = function (blizzardChars, existingChar) {
   const toUpdate = []
 
   for (const char of blizzardChars) {
-    const match = existingChar.find((c) => c.char_id === char.char_id)
+    const match = existingChar.find(c => c.char_id === char.char_id)
 
     if (!match) {
       toCreate.push(char)
     } else {
-      const hasChanged = (
+      const hasChanged =
         char.level !== match.level ||
         char.realm !== match.realm ||
         char.race !== match.race ||
         char.name !== match.name
-      )
 
       if (hasChanged) {
         toUpdate.push({
           ...match,
           ...char,
-          id: match.id
+          id: match.id,
         })
       }
     }
@@ -204,11 +236,11 @@ const mergeCharacters = function (blizzardChars, existingChar) {
   return { toCreate, toUpdate }
 }
 
-const setAsMainCharacter = async (char) => {
+const setAsMainCharacter = async char => {
   if (!char || !authToken) return
 
   try {
-    const updates = characters.value.map((c) => ({
+    const updates = characters.value.map(c => ({
       id: c.id,
       is_main: c.id === char.id,
     }))
@@ -230,7 +262,7 @@ const setAsMainCharacter = async (char) => {
       throw new Error(err.error?.message || 'Erreur lors de la mise à jour')
     }
 
-    characters.value = characters.value.map((c) => ({
+    characters.value = characters.value.map(c => ({
       ...c,
       is_main: c.id === char.id,
     }))
@@ -242,7 +274,6 @@ const setAsMainCharacter = async (char) => {
   }
 }
 
-
 const sortedCharacters = computed(() => [...characters.value].sort((a, b) => b.level - a.level))
 
 onMounted(() => {
@@ -252,71 +283,728 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="uk-container uk-margin-top">
-    <div v-if="!bnetLinked">
-      <button class="uk-button uk-button-primary uk-button-disable" @click="syncCharacters">
-        Votre compte n'est pas lié à Battle.net
-      </button>
-    </div>
+  <div class="profile-page">
+    <div class="profile-container">
+      <!-- En-tête -->
+      <div class="profile-header">
+        <h1 class="page-title">Mes Personnages</h1>
+        <p class="page-subtitle">
+          Gérez vos personnages World of Warcraft et définissez votre main
+        </p>
+      </div>
 
-    <div v-else>
-      <button class="uk-button uk-button-primary" @click="syncCharacters">
-        {{
-        !alreadyCalled
-        ? 'Synchroniser mes personnages'
-        : 'Patientez avant de relancer une synchronisation'
-        }}
-      </button>
-      <div class="uk-grid-large" uk-grid>
-        <!-- Liste des persos -->
-        <div class="uk-width-1-2@s">
-          <h3>Vos personnages</h3>
-          <div v-if="sortedCharacters.length === 0">Aucun personnage trouvé.</div>
-          <div class="uk-grid-small" uk-grid>
-            <CharacterCard
-              v-for="char in sortedCharacters"
-              :key="char.char_id"
-              :character="char"
-              :class=" {
-                'uk-card-primary': selectedChar?.char_id === char.char_id,
-              }"
-              style="    cursor: pointer"
-              @click="selectedChar = char"
-            />
+      <!-- État non lié -->
+      <BaseCard v-if="!bnetLinked" variant="hover" padding="large">
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
           </div>
+          <h3>Compte Battle.net non lié</h3>
+          <p>Vous devez lier votre compte Battle.net pour synchroniser vos personnages.</p>
+          <BaseButton variant="battlenet" disabled> Lier votre compte Battle.net </BaseButton>
+        </div>
+      </BaseCard>
+
+      <!-- Interface principale -->
+      <div v-else class="profile-content">
+        <!-- Bouton de synchronisation -->
+        <div class="sync-section">
+          <BaseButton
+            variant="primary"
+            :loading="isLoading"
+            :disabled="alreadyCalled"
+            @click="syncCharacters"
+          >
+            <svg
+              v-if="!isLoading && !alreadyCalled"
+              class="button-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+            {{
+              isLoading
+                ? 'Synchronisation...'
+                : alreadyCalled
+                  ? 'Patientez avant de relancer'
+                  : 'Synchroniser mes personnages'
+            }}
+          </BaseButton>
         </div>
 
-        <!-- Détails à droite -->
-        <div class="uk-width-1-2@s">
-          <transition name="fade">
-            <div v-if="selectedChar">
-              <h3>Détails du personnage</h3>
-              <div class="uk-card uk-card-default uk-card-body"><div class="uk-card uk-card-default uk-card-body">
-                <p><strong>Nom :</strong> {{ selectedChar.name }}</p>
-                <p><strong>Niveau :</strong> {{ selectedChar.level }}</p>
-                <p><strong>Classe :</strong> {{ selectedChar.class }}</p>
-                <p><strong>Race :</strong> {{ selectedChar.race }}</p>
-                <p><strong>Royaume :</strong> {{ selectedChar.realm }}</p>
-                <p><strong>Statut :</strong>
-                  <span v-if="selectedChar.is_main">Personnage principal ✅</span>
-                </p>
+        <!-- Erreur -->
+        <BaseCard v-if="error" variant="default" padding="default">
+          <div class="error-message">
+            <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>{{ error }}</span>
+          </div>
+        </BaseCard>
 
-                <button
-                  v-if="!selectedChar.is_main"
-                  class="uk-button uk-button-secondary uk-margin-top"
-                  @click="setAsMainCharacter(selectedChar)"
-                >
-                  Définir comme personnage principal
-                </button>
+        <!-- Layout principal -->
+        <div class="characters-layout">
+          <!-- Liste des personnages -->
+          <div class="characters-list">
+            <BaseCard variant="default" padding="large">
+              <h2 class="section-title">
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                </svg>
+                Vos personnages ({{ sortedCharacters.length }})
+              </h2>
+
+              <!-- État vide -->
+              <div v-if="sortedCharacters.length === 0 && !isLoading" class="empty-characters">
+                <div class="empty-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                </div>
+                <h3>Aucun personnage trouvé</h3>
+                <p>Cliquez sur "Synchroniser" pour charger vos personnages depuis Battle.net.</p>
               </div>
-            </div>
-            </div>
-            <div v-else>
-              <p>Sélectionnez un personnage pour voir les détails.</p>
-            </div>
-          </transition>
+
+              <!-- Liste des cartes -->
+              <div v-else class="characters-grid">
+                <CharacterCard
+                  v-for="char in sortedCharacters"
+                  :key="char.char_id"
+                  :character="char"
+                  :selected="selectedChar?.char_id === char.char_id"
+                  variant="default"
+                  size="medium"
+                  @click="selectedChar = char"
+                  @set-main="setAsMainCharacter"
+                />
+              </div>
+            </BaseCard>
+          </div>
+
+          <!-- Détails du personnage -->
+          <div class="character-details">
+            <BaseCard variant="default" padding="large">
+              <transition name="fade" mode="out-in">
+                <!-- Personnage sélectionné -->
+                <div v-if="selectedChar" key="selected">
+                  <h2 class="section-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    Détails du personnage
+                  </h2>
+
+                  <div class="character-profile">
+                    <!-- Avatar principal -->
+                    <div class="profile-avatar">
+                      <img
+                        :src="getCharacterAvatar(selectedChar, 'main')"
+                        :alt="selectedChar.name"
+                        class="profile-image"
+                        @error="
+                          $event.target.src =
+                            'https://via.placeholder.com/120x120/2B1B18/F5E0B9?text=WoW'
+                        "
+                      />
+                      <div class="profile-level">{{ selectedChar.level }}</div>
+
+                      <!-- Badge Main si applicable -->
+                      <div v-if="selectedChar.is_main" class="profile-main-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        Main
+                      </div>
+                    </div>
+
+                    <!-- Informations détaillées -->
+                    <div class="profile-info">
+                      <div class="info-row">
+                        <span class="info-label">
+                          <svg
+                            class="info-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                            />
+                          </svg>
+                          Nom
+                        </span>
+                        <span
+                          class="info-value character-name"
+                          :style="{ color: getClassColor(selectedChar.class) }"
+                        >
+                          {{ selectedChar.name }}
+                        </span>
+                      </div>
+
+                      <div class="info-row">
+                        <span class="info-label">
+                          <svg
+                            class="info-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M13 10V3L4 14h7v7l9-11h-7z"
+                            />
+                          </svg>
+                          Niveau
+                        </span>
+                        <span class="info-value level-value">{{ selectedChar.level }}</span>
+                      </div>
+
+                      <div class="info-row">
+                        <span class="info-label">
+                          <svg
+                            class="info-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          Classe
+                        </span>
+                        <span
+                          class="info-value class-value"
+                          :style="{ color: getClassColor(selectedChar.class) }"
+                        >
+                          {{ selectedChar.class }}
+                        </span>
+                      </div>
+
+                      <div class="info-row">
+                        <span class="info-label">
+                          <svg
+                            class="info-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                            />
+                          </svg>
+                          Race
+                        </span>
+                        <span class="info-value">{{ selectedChar.race }}</span>
+                      </div>
+
+                      <div class="info-row">
+                        <span class="info-label">
+                          <svg
+                            class="info-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"
+                            />
+                          </svg>
+                          Royaume
+                        </span>
+                        <span class="info-value">{{ selectedChar.realm }}</span>
+                      </div>
+
+                      <div class="info-row">
+                        <span class="info-label">
+                          <svg
+                            class="info-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                            />
+                          </svg>
+                          Statut
+                        </span>
+                        <span v-if="selectedChar.is_main" class="info-value main-status">
+                          <svg
+                            class="status-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                          Personnage principal
+                        </span>
+                        <span v-else class="info-value secondary-status"
+                          >Personnage secondaire</span
+                        >
+                      </div>
+                    </div>
+
+                    <!-- Action -->
+                    <div v-if="!selectedChar.is_main" class="profile-actions">
+                      <BaseButton
+                        variant="success"
+                        full-width
+                        @click="setAsMainCharacter(selectedChar)"
+                      >
+                        <svg
+                          class="button-icon"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        Définir comme personnage principal
+                      </BaseButton>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- État par défaut -->
+                <div v-else key="empty" class="select-character">
+                  <div class="select-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                  </div>
+                  <h3>Sélectionnez un personnage</h3>
+                  <p>Cliquez sur l'un de vos personnages pour voir ses détails et le gérer.</p>
+                </div>
+              </transition>
+            </BaseCard>
+          </div>
         </div>
       </div>
     </div>
-  </main>
+  </div>
 </template>
+
+<style scoped>
+.profile-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--color-dark) 0%, #1a1110 100%);
+  padding: 32px 0;
+}
+
+.profile-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+/* === EN-TÊTE === */
+.profile-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.page-title {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 48px;
+  font-weight: bold;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.page-subtitle {
+  font-size: 18px;
+  color: var(--color-gray);
+  margin: 16px 0 0;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* === SYNCHRONISATION === */
+.sync-section {
+  margin-bottom: 32px;
+  display: flex;
+  justify-content: center;
+}
+
+.button-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* === ERREURS === */
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.error-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* === LAYOUT === */
+.profile-content {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.characters-layout {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 32px;
+  align-items: start;
+}
+
+/* === SECTIONS === */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--color-light);
+  margin: 0 0 24px;
+}
+
+.section-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--color-orange);
+}
+
+/* === PERSONNAGES === */
+.characters-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.empty-characters,
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.empty-icon,
+.select-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 24px;
+  color: var(--color-gray);
+}
+
+.empty-characters h3,
+.empty-state h3,
+.select-character h3 {
+  font-size: 20px;
+  color: var(--color-light);
+  margin: 0 0 8px;
+}
+
+.empty-characters p,
+.empty-state p,
+.select-character p {
+  color: var(--color-gray);
+  margin: 0 0 24px;
+}
+
+/* === DÉTAILS DU PERSONNAGE === */
+.character-profile {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.profile-avatar {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 16px;
+  object-fit: cover;
+  border: 3px solid var(--color-border);
+  background: var(--color-dark);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.profile-level {
+  position: absolute;
+  bottom: -8px;
+  right: 50%;
+  transform: translateX(50%);
+  background: linear-gradient(135deg, var(--color-accent), var(--color-orange));
+  color: var(--color-light);
+  font-size: 16px;
+  font-weight: bold;
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: 2px solid var(--color-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.profile-main-badge {
+  position: absolute;
+  top: -8px;
+  right: 50%;
+  transform: translateX(50%);
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #1f2937;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+}
+
+.profile-main-badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(43, 27, 24, 0.6);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.info-row:hover {
+  background: rgba(43, 27, 24, 0.8);
+  border-color: var(--color-orange);
+}
+
+.info-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--color-gray);
+}
+
+.info-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--color-orange);
+}
+
+.info-value {
+  color: var(--color-light);
+  font-weight: 600;
+  text-align: right;
+}
+
+.character-name {
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.level-value {
+  background: linear-gradient(135deg, var(--color-accent), var(--color-orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: bold;
+}
+
+.class-value {
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.main-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #10b981;
+  font-weight: bold;
+}
+
+.secondary-status {
+  color: var(--color-gray);
+}
+
+.status-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.profile-actions {
+  margin-top: 8px;
+}
+
+.select-character {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+/* === TRANSITIONS === */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 1024px) {
+  .characters-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 0 20px;
+  }
+
+  .page-title {
+    font-size: 36px;
+  }
+
+  .page-subtitle {
+    font-size: 16px;
+  }
+
+  .characters-layout {
+    gap: 20px;
+  }
+
+  .section-title {
+    font-size: 20px;
+  }
+
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .info-value {
+    text-align: left;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-page {
+    padding: 20px 0;
+  }
+
+  .profile-container {
+    padding: 0 16px;
+  }
+
+  .page-title {
+    font-size: 28px;
+  }
+
+  .profile-image {
+    width: 100px;
+    height: 100px;
+  }
+}
+</style>

@@ -2,12 +2,13 @@
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import BaseTabs from '@/components/ui/BaseTabs.vue'
 
 const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
-// 🎯 Utilise computed pour la réactivité
+//  Utilise computed pour la réactivité
 const user = computed(() => auth.user)
 const beurl = import.meta.env.VITE_BACKEND_BASE_URL
 const showMobile = ref(false)
@@ -16,6 +17,38 @@ const isScrolled = ref(false)
 
 const defaultAvatar = 'https://via.placeholder.com/40x40.png?text=👤'
 const userAvatar = ref(defaultAvatar)
+
+// ** TABS CONFIGURATION **
+const navigationTabs = [
+  {
+    id: 'dashboard',
+    name: 'Dashboard',
+    icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
+  },
+  {
+    id: 'profile',
+    name: 'Profil',
+    icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
+  },
+]
+
+// Computed pour l'onglet actif basé sur la route
+const activeTab = computed(() => {
+  const routeName = route.name
+  if (routeName === 'dashboard') return 'dashboard'
+  if (routeName === 'user-profile') return 'profile'
+  return 'dashboard' // fallback
+})
+
+// Fonction pour changer d'onglet
+function handleTabChange(tabId) {
+  if (tabId === 'dashboard') {
+    router.push({ name: 'dashboard' })
+  } else if (tabId === 'profile') {
+    router.push({ name: 'user-profile' })
+  }
+  closeMenus()
+}
 
 async function fetchAvatar() {
   if (!user.value?.avatar || !auth.token) {
@@ -41,7 +74,7 @@ async function fetchAvatar() {
   }
 }
 
-// 🎯 Watcher pour rafraîchir l'avatar quand l'utilisateur change
+//  Watcher pour rafraîchir l'avatar quand l'utilisateur change
 watch(
   user,
   newUser => {
@@ -93,7 +126,7 @@ function closeMenus() {
     <div class="navbar-container">
       <!-- Logo et titre -->
       <div class="navbar-brand">
-        <router-link to="/dashboard" class="brand-link" @click="closeMenus">
+        <div class="brand-link">
           <div class="brand-logo">
             <img src="@/assets/logo-sabotache.png" alt="Team Sabotache" class="logo-image" />
           </div>
@@ -101,19 +134,23 @@ function closeMenus() {
             <span class="brand-name">Team Sabotache</span>
             <span class="brand-subtitle">Dashboard</span>
           </div>
-        </router-link>
+        </div>
+      </div>
+
+      <!-- ** NAVIGATION TABS (Desktop) ** -->
+      <div v-if="user" class="navbar-tabs">
+        <BaseTabs
+          :tabs="navigationTabs"
+          :model-value="activeTab"
+          @update:model-value="handleTabChange"
+        />
       </div>
 
       <!-- User menu (Desktop) -->
-      <div class="navbar-profile">
-        <button class="profile-button" @click="router.push({ name: 'user-profile' })">
-          Profile
-        </button>
-      </div>
       <div v-if="user" class="navbar-user">
         <button class="user-button" @click="toggleUserMenu">
           <div class="user-info">
-            <span class="user-name">{{ user.first_name }}</span>
+            <span class="user-name">Bonjour {{ user.first_name }}</span>
             <span class="user-role">Membre</span>
           </div>
           <img :src="userAvatar" :alt="user.first_name || 'Utilisateur'" class="user-avatar" />
@@ -142,7 +179,7 @@ function closeMenus() {
               class="dropdown-avatar"
             />
             <div class="dropdown-user-info">
-              <span class="dropdown-name">{{ user.first_name }} {{ user.last_name }}</span>
+              <span class="dropdown-name">Bonjour {{ user.first_name }} {{ user.last_name }}</span>
               <span class="dropdown-email">membre@teamsabotache.com</span>
             </div>
           </div>
@@ -225,22 +262,21 @@ function closeMenus() {
     <!-- Mobile menu -->
     <div class="mobile-menu" :class="{ 'mobile-menu-open': showMobile }">
       <div class="mobile-nav">
-        <router-link
-          to="/dashboard"
-          class="mobile-nav-link"
-          :class="{ 'mobile-nav-link-active': route.name === 'dashboard' }"
-          @click="closeMenus"
-        >
-          <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-            />
-          </svg>
-          <span>Dashboard</span>
-        </router-link>
+        <!-- ** TABS MOBILE ** -->
+        <div class="mobile-tabs">
+          <button
+            v-for="tab in navigationTabs"
+            :key="tab.id"
+            class="mobile-nav-link"
+            :class="{ 'mobile-nav-link-active': activeTab === tab.id }"
+            @click="handleTabChange(tab.id)"
+          >
+            <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="tab.icon" />
+            </svg>
+            <span>{{ tab.name }}</span>
+          </button>
+        </div>
       </div>
 
       <div v-if="user" class="mobile-user">
@@ -251,7 +287,7 @@ function closeMenus() {
             class="mobile-user-avatar"
           />
           <div class="mobile-user-details">
-            <span class="mobile-user-name">{{ user.first_name }} {{ user.last_name }}</span>
+            <span class="mobile-user-name">Bonjour {{ user.first_name }} {{ user.last_name }}</span>
             <span class="mobile-user-email">membre@teamsabotache.com</span>
           </div>
         </div>
@@ -320,12 +356,14 @@ function closeMenus() {
   align-items: center;
   justify-content: space-between;
   height: 80px;
+  gap: 32px;
 }
 
 /* === BRAND === */
 .navbar-brand {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .brand-link {
@@ -335,10 +373,6 @@ function closeMenus() {
   text-decoration: none;
   color: var(--color-light);
   transition: all 0.3s ease;
-}
-
-.brand-link:hover {
-  transform: translateX(4px);
 }
 
 .brand-logo {
@@ -351,11 +385,6 @@ function closeMenus() {
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
-}
-
-.brand-link:hover .brand-logo {
-  transform: scale(1.1) rotate(5deg);
-  box-shadow: 0 8px 20px rgba(249, 131, 58, 0.4);
 }
 
 .logo-image {
@@ -384,9 +413,38 @@ function closeMenus() {
   font-weight: 500;
 }
 
+/* === ** NAVIGATION TABS ** === */
+.navbar-tabs {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  max-width: 400px;
+}
+
+/* Styles pour harmoniser BaseTabs avec la navbar */
+.navbar-tabs :deep(.base-tabs) {
+  width: 100%;
+}
+
+.navbar-tabs :deep(.tabs-nav) {
+  background: rgba(43, 27, 24, 0.4);
+  border: 1px solid rgba(245, 224, 185, 0.2);
+  margin-bottom: 0;
+}
+
+.navbar-tabs :deep(.tab-button) {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.navbar-tabs :deep(.tabs-content) {
+  display: none; /* On ne veut que la navigation */
+}
+
 /* === USER MENU === */
 .navbar-user {
   position: relative;
+  flex-shrink: 0;
 }
 
 .user-button {
@@ -591,6 +649,15 @@ function closeMenus() {
   gap: 8px;
 }
 
+.mobile-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
 .mobile-nav-link {
   display: flex;
   align-items: center;
@@ -684,6 +751,12 @@ function closeMenus() {
 }
 
 /* === RESPONSIVE === */
+@media (max-width: 1024px) {
+  .navbar-tabs {
+    display: none; /* Masquer les tabs sur tablette et mobile */
+  }
+}
+
 @media (max-width: 768px) {
   .navbar-container {
     padding: 0 20px;
