@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { useToastStore } from '@/stores/toast'
 
+import API from '@/helpers/axios'
+
 const API_URL = import.meta.env.VITE_BACKEND_BASE_URL
 
 export const useAuthStore = defineStore('auth', {
@@ -35,12 +37,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async fetchUser() {
-      const res = await axios.get(
-        `${API_URL}/users/me?fields=id,first_name,last_name,email,role.name,avatar`,
-        {
-          headers: { Authorization: `Bearer ${this.token}` },
-        }
-      )
+      const res = await API.get('/users/me?fields=id,first_name,last_name,email,role.name,avatar')
       this.user = res.data.data
     },
 
@@ -48,8 +45,8 @@ export const useAuthStore = defineStore('auth', {
       if (!this.refreshToken) return false
 
       try {
-        const res = await axios.post(`${API_URL}/auth/refresh`, {
-          refresh_token: this.refreshToken
+        const res = await API.post('/auth/refresh', {
+          refresh_token: this.refreshToken,
         })
 
         this.token = res.data.data.access_token

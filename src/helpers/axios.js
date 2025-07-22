@@ -5,7 +5,7 @@ const API = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_BASE_URL,
 })
 
-API.interceptors.request.use((config) => {
+API.interceptors.request.use(config => {
   const auth = useAuthStore()
   if (auth.token) {
     config.headers.Authorization = `Bearer ${auth.token}`
@@ -14,16 +14,12 @@ API.interceptors.request.use((config) => {
 })
 
 API.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  response => response,
+  async error => {
     const auth = useAuthStore()
     const originalRequest = error.config
 
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry &&
-      auth.refreshToken
-    ) {
+    if (error.response?.status === 401 && !originalRequest._retry && auth.refreshToken) {
       originalRequest._retry = true
       const success = await auth.refreshAccessToken()
       if (success) {

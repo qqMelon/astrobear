@@ -64,9 +64,7 @@ const loadChars = async function () {
 const pullFromDirectus = async function () {
   const res = await fetch(
     import.meta.env.VITE_BACKEND_BASE_URL +
-    `/items/wow_characters?filter[user][_eq]=${
-authStore.user.id
-}`,
+      `/items/wow_characters?filter[user][_eq]=${authStore.user.id}`,
     {
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -236,9 +234,7 @@ const setAsMainCharacter = async function (char) {
     }))
     selectedChar.value = { ...char, is_main: true }
 
-    console.log(`✅ ${
-char.name
-} est maintenant le personnage principal.`)
+    console.log(`✅ ${char.name} est maintenant le personnage principal.`)
   } catch (err) {
     console.error('❌ Erreur lors de la définition du personnage principal:', err)
   }
@@ -264,9 +260,9 @@ onMounted(() => {
     <div v-else>
       <button class="uk-button uk-button-primary" @click="syncCharacters">
         {{
-        !alreadyCalled
-        ? 'Synchroniser mes personnages'
-        : 'Patientez avant de relancer une synchronisation'
+          !alreadyCalled
+            ? 'Synchroniser mes personnages'
+            : 'Patientez avant de relancer une synchronisation'
         }}
       </button>
       <div class="uk-grid-large" uk-grid>
@@ -279,10 +275,10 @@ onMounted(() => {
               v-for="char in sortedCharacters"
               :key="char.char_id"
               :character="char"
-              :class=" {
+              :class="{
                 'uk-card-primary': selectedChar?.char_id === char.char_id,
               }"
-              style="      cursor: pointer"
+              style="cursor: pointer"
               @click="selectedChar = char"
             />
           </div>
