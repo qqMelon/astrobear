@@ -6,23 +6,31 @@ import { useToastStore } from '@/stores/toast'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 
-const email = ref('john@doe.com')
-const password = ref('test')
-const error = ref(false)
-const isLoading = ref(false)
 const router = useRouter()
 const auth = useAuthStore()
 const toastStore = useToastStore()
+
+const storedEmail = localStorage.getItem('astrobear-last-email')
+
+const email = ref(storedEmail || 'john@doe.com')
+const password = ref('test') // Temporaire pour les tests
+const keepDataLogin = ref(!!storedEmail)
+const error = ref(false)
+const isLoading = ref(false)
 
 const handleLogin = async () => {
   error.value = false
   isLoading.value = true
 
+  if (keepDataLogin.value) {
+    localStorage.setItem('astrobear-last-email', email.value)
+  } else {
+    localStorage.removeItem('astrobear-last-email')
+  }
+
   const success = await auth.login(email.value, password.value)
   if (success) {
     toastStore.showSuccess('Connexion réussie ! Bienvenue 👋')
-
-    // 🎯 Redirection immédiate sans délai
     router.push('/dashboard')
   } else {
     toastStore.showError('Identifiants incorrects 😕')
@@ -69,7 +77,7 @@ const handleLogin = async () => {
 
         <aside class="form-options">
           <label class="checkbox-container">
-            <input type="checkbox" class="checkbox" />
+            <input v-model="keepDataLogin" type="checkbox" class="checkbox" value="true" />
             <span class="checkmark"></span>
             Se souvenir de moi
           </label>

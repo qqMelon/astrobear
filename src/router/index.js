@@ -68,25 +68,36 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const auth = useAuthStore()
 
-  console.log('user is authenticated ?', auth.isAuthenticated())
-
-  if (to.meta.requiresAuth && !auth.isAuthenticated()) {
-    console.log('First condition with nothing in store')
-    next({ name: 'login' })
-  } else if (to.meta.requiresAuth && auth.isAuthenticated() && !auth.user) {
-    console.log('snd condition with authenticated but no user infos')
-    try {
-      console.log('Try to retreive user')
-      await auth.fetchUser()
-      console.log('Retrivied user success')
-      next()
-    } catch (err) {
-      console.error('Error return to login: ', err)
-      next({ name: 'login' })
+  if (to.meta.requiresAuth) {
+    if (!auth.isAuthenticated()) {
+      console.log('Non authentifié → login')
+      return next({ name: 'login' })
     }
-  } else {
-    next()
+
+    try {
+      if (!auth.user) {
+        console.log('Pas de user, tentative de récupération...')
+        await auth.fetchUser()
+      }
+      return next()
+    } catch (err) {
+      console.warn('❌ Token peut-être expiré, tentative de refresh...')
+
+      const refreshed = await auth.refreshAccessToken()
+      if (refreshed) {
+        try {
+          await auth.fetchUser()
+          return next()
+        } catch {
+          return next({ name: 'login' })
+        }
+      } else {
+        return next({ name: 'login' })
+      }
+    }
   }
+
+  return next()
 })
 
 export default router

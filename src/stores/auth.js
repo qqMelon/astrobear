@@ -2,43 +2,65 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { useToastStore } from '@/stores/toast'
 
+import API from '@/helpers/axios'
+
 const API_URL = import.meta.env.VITE_BACKEND_BASE_URL
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
     token: localStorage.getItem('astrobear-user-token') || '',
-    refreshToken: localStorage.getItem('astrobear-user-refreshToken') ||  '',
+    refreshToken: localStorage.getItem('astrobear-user-refreshToken') || '',
   }),
 
   actions: {
-    // Dans ta méthode login :
     async login(email, password) {
       const toastStore = useToastStore()
 
       try {
         const res = await axios.post(`${API_URL}/auth/login`, { email, password })
+
         this.token = res.data.data.access_token
+        this.refreshToken = res.data.data.refresh_token
+
         localStorage.setItem('astrobear-user-token', this.token)
+        localStorage.setItem('astrobear-user-refreshToken', this.refreshToken)
 
         await this.fetchUser()
         toastStore.showSuccess('Connexion réussie ! Bienvenue 👋')
         return true
       } catch (err) {
         console.error('login failed: ', err)
-        toastStore.showError(err) // 🎯 Utilise la nouvelle méthode
+        toastStore.showError(err)
         return false
       }
     },
 
     async fetchUser() {
-      const res = await axios.get(
-        `${API_URL}/users/me?fields=id,first_name,last_name,email,role.name,avatar`,
-        {
-          headers: { Authorization: `Bearer ${this.token}` },
-        }
-      )
+      const res = await API.get('/users/me?fields=id,first_name,last_name,email,role.name,avatar')
       this.user = res.data.data
+    },
+
+    async refreshAccessToken() {
+      if (!this.refreshToken) return false
+
+      try {
+        const res = await API.post('/auth/refresh', {
+          refresh_token: this.refreshToken,
+        })
+
+        this.token = res.data.data.access_token
+        this.refreshToken = res.data.data.refresh_token
+
+        localStorage.setItem('astrobear-user-token', this.token)
+        localStorage.setItem('astrobear-user-refreshToken', this.refreshToken)
+
+        return true
+      } catch (err) {
+        console.error('Echec du refresh token: ', err)
+        this.logout()
+        return false
+      }
     },
 
     setProfilePicture(blobPicture) {
