@@ -250,7 +250,7 @@ onMounted(() => {
 
 <template>
   <main class="uk-container uk-margin-top">
-    <div v-if="!bnetLinked">
+    <div v-if="!bnetLinked && !characters">
       Votre compte n'est pas lié à Battle.net
       <button class="uk-button uk-button-primary" @click="router.push({ name: 'user-settings' })">
         Recupéré un jeton Blizzard
@@ -258,7 +258,13 @@ onMounted(() => {
     </div>
 
     <div v-else>
-      <button class="uk-button uk-button-primary" @click="syncCharacters">
+      <div v-if="!bnetLinked">
+        Votre compte n'est pas lié à Battle.net
+        <button class="uk-button uk-button-primary" @click="router.push({ name: 'user-settings' })">
+          Recupéré un jeton Blizzard
+        </button>
+      </div>
+      <button v-else class="uk-button uk-button-primary" @click="syncCharacters">
         {{
           !alreadyCalled
             ? 'Synchroniser mes personnages'
