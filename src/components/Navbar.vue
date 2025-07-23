@@ -1,12 +1,10 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import BaseTabs from '@/components/ui/BaseTabs.vue'
 
 const auth = useAuthStore()
 const router = useRouter()
-const route = useRoute()
 
 //  Utilise computed pour la réactivité
 const user = computed(() => auth.user)
@@ -15,40 +13,10 @@ const showMobile = ref(false)
 const showUserMenu = ref(false)
 const isScrolled = ref(false)
 
-const defaultAvatar = 'https://via.placeholder.com/40x40.png?text=👤'
+// Avatar par défaut fiable qui ne génère pas d'erreur
+const defaultAvatar =
+  'https://ui-avatars.com/api/?name=User&size=40&background=2B1B18&color=F5E0B9&bold=true&format=png&font-size=0.6'
 const userAvatar = ref(defaultAvatar)
-
-// ** TABS CONFIGURATION **
-const navigationTabs = [
-  {
-    id: 'dashboard',
-    name: 'Dashboard',
-    icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
-  },
-  {
-    id: 'profile',
-    name: 'Profil',
-    icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
-  },
-]
-
-// Computed pour l'onglet actif basé sur la route
-const activeTab = computed(() => {
-  const routeName = route.name
-  if (routeName === 'dashboard') return 'dashboard'
-  if (routeName === 'user-profile') return 'profile'
-  return 'dashboard' // fallback
-})
-
-// Fonction pour changer d'onglet
-function handleTabChange(tabId) {
-  if (tabId === 'dashboard') {
-    router.push({ name: 'dashboard' })
-  } else if (tabId === 'profile') {
-    router.push({ name: 'user-profile' })
-  }
-  closeMenus()
-}
 
 async function fetchAvatar() {
   if (!user.value?.avatar || !auth.token) {
@@ -126,7 +94,7 @@ function closeMenus() {
     <div class="navbar-container">
       <!-- Logo et titre -->
       <div class="navbar-brand">
-        <div class="brand-link">
+        <router-link to="/dashboard" class="brand-link">
           <div class="brand-logo">
             <img src="@/assets/logo-sabotache.png" alt="Team Sabotache" class="logo-image" />
           </div>
@@ -134,23 +102,41 @@ function closeMenus() {
             <span class="brand-name">Team Sabotache</span>
             <span class="brand-subtitle">Dashboard</span>
           </div>
-        </div>
+        </router-link>
       </div>
 
-      <!-- ** NAVIGATION TABS (Desktop) ** -->
-      <div v-if="user" class="navbar-tabs">
-        <BaseTabs
-          :tabs="navigationTabs"
-          :model-value="activeTab"
-          @update:model-value="handleTabChange"
-        />
+      <!-- Navigation principale (Desktop uniquement) -->
+      <div v-if="user" class="navbar-nav">
+        <router-link to="/dashboard" class="nav-link" active-class="nav-link-active">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+            />
+          </svg>
+          <span>Dashboard</span>
+        </router-link>
+
+        <router-link to="/user-profile" class="nav-link" active-class="nav-link-active">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
+          </svg>
+          <span>Profil</span>
+        </router-link>
       </div>
 
       <!-- User menu (Desktop) -->
       <div v-if="user" class="navbar-user">
         <button class="user-button" @click="toggleUserMenu">
           <div class="user-info">
-            <span class="user-name">Bonjour {{ user.first_name }}</span>
+            <span class="user-name">{{ user.first_name }}</span>
             <span class="user-role">Membre</span>
           </div>
           <img :src="userAvatar" :alt="user.first_name || 'Utilisateur'" class="user-avatar" />
@@ -179,8 +165,8 @@ function closeMenus() {
               class="dropdown-avatar"
             />
             <div class="dropdown-user-info">
-              <span class="dropdown-name">Bonjour {{ user.first_name }} {{ user.last_name }}</span>
-              <span class="dropdown-email">membre@teamsabotache.com</span>
+              <span class="dropdown-name">{{ user.first_name }} {{ user.last_name }}</span>
+              <span class="dropdown-email">{{ user.email }}</span>
             </div>
           </div>
 
@@ -262,21 +248,39 @@ function closeMenus() {
     <!-- Mobile menu -->
     <div class="mobile-menu" :class="{ 'mobile-menu-open': showMobile }">
       <div class="mobile-nav">
-        <!-- ** TABS MOBILE ** -->
-        <div class="mobile-tabs">
-          <button
-            v-for="tab in navigationTabs"
-            :key="tab.id"
-            class="mobile-nav-link"
-            :class="{ 'mobile-nav-link-active': activeTab === tab.id }"
-            @click="handleTabChange(tab.id)"
-          >
-            <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="tab.icon" />
-            </svg>
-            <span>{{ tab.name }}</span>
-          </button>
-        </div>
+        <router-link
+          to="/dashboard"
+          class="mobile-nav-link"
+          active-class="mobile-nav-link-active"
+          @click="closeMenus"
+        >
+          <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+            />
+          </svg>
+          <span>Dashboard</span>
+        </router-link>
+
+        <router-link
+          to="/user-profile"
+          class="mobile-nav-link"
+          active-class="mobile-nav-link-active"
+          @click="closeMenus"
+        >
+          <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
+          </svg>
+          <span>Profil</span>
+        </router-link>
       </div>
 
       <div v-if="user" class="mobile-user">
@@ -287,8 +291,8 @@ function closeMenus() {
             class="mobile-user-avatar"
           />
           <div class="mobile-user-details">
-            <span class="mobile-user-name">Bonjour {{ user.first_name }} {{ user.last_name }}</span>
-            <span class="mobile-user-email">membre@teamsabotache.com</span>
+            <span class="mobile-user-name">{{ user.first_name }} {{ user.last_name }}</span>
+            <span class="mobile-user-email">{{ user.email }}</span>
           </div>
         </div>
 
@@ -339,13 +343,13 @@ function closeMenus() {
   z-index: 1000;
   background: rgba(43, 27, 24, 0.9);
   backdrop-filter: blur(20px);
-  border-bottom: 2px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
   transition: all 0.3s ease;
 }
 
 .navbar-scrolled {
   background: rgba(43, 27, 24, 0.95);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .navbar-container {
@@ -356,14 +360,12 @@ function closeMenus() {
   align-items: center;
   justify-content: space-between;
   height: 80px;
-  gap: 32px;
 }
 
 /* === BRAND === */
 .navbar-brand {
   display: flex;
   align-items: center;
-  flex-shrink: 0;
 }
 
 .brand-link {
@@ -371,8 +373,7 @@ function closeMenus() {
   align-items: center;
   gap: 16px;
   text-decoration: none;
-  color: var(--color-light);
-  transition: all 0.3s ease;
+  color: inherit;
 }
 
 .brand-logo {
@@ -380,18 +381,13 @@ function closeMenus() {
   height: 48px;
   border-radius: 12px;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--color-accent), var(--color-orange));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
+  border: 2px solid var(--color-border);
 }
 
 .logo-image {
-  width: 36px;
-  height: 36px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 8px;
 }
 
 .brand-text {
@@ -409,42 +405,52 @@ function closeMenus() {
 
 .brand-subtitle {
   font-size: 12px;
-  color: var(--color-gray);
+  color: var(--color-orange);
   font-weight: 500;
+  line-height: 1;
 }
 
-/* === ** NAVIGATION TABS ** === */
-.navbar-tabs {
-  flex: 1;
+/* === NAVIGATION === */
+.navbar-nav {
   display: flex;
-  justify-content: center;
-  max-width: 400px;
+  align-items: center;
+  gap: 8px;
 }
 
-/* Styles pour harmoniser BaseTabs avec la navbar */
-.navbar-tabs :deep(.base-tabs) {
-  width: 100%;
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  color: var(--color-light);
+  text-decoration: none;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 15px;
 }
 
-.navbar-tabs :deep(.tabs-nav) {
-  background: rgba(43, 27, 24, 0.4);
-  border: 1px solid rgba(245, 224, 185, 0.2);
-  margin-bottom: 0;
+.nav-link:hover {
+  background: rgba(249, 131, 58, 0.1);
+  color: var(--color-orange);
 }
 
-.navbar-tabs :deep(.tab-button) {
-  font-size: 14px;
-  font-weight: 600;
+.nav-link-active {
+  background: rgba(249, 131, 58, 0.15);
+  color: var(--color-orange);
 }
 
-.navbar-tabs :deep(.tabs-content) {
-  display: none; /* On ne veut que la navigation */
+.nav-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 /* === USER MENU === */
 .navbar-user {
   position: relative;
-  flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 .user-button {
@@ -452,18 +458,18 @@ function closeMenus() {
   align-items: center;
   gap: 12px;
   padding: 8px 16px;
-  background: rgba(245, 224, 185, 0.1);
-  border: 1px solid var(--color-border);
+  background: rgba(43, 27, 24, 0.6);
+  border: 2px solid var(--color-border);
   border-radius: 12px;
   color: var(--color-light);
   cursor: pointer;
   transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
 }
 
 .user-button:hover {
-  background: rgba(245, 224, 185, 0.15);
   border-color: var(--color-orange);
-  transform: translateY(-2px);
+  background: rgba(43, 27, 24, 0.8);
 }
 
 .user-info {
@@ -477,18 +483,19 @@ function closeMenus() {
   font-size: 14px;
   font-weight: 600;
   color: var(--color-light);
-  line-height: 1;
+  line-height: 1.2;
 }
 
 .user-role {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--color-gray);
+  line-height: 1.2;
 }
 
 .user-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: 8px;
   object-fit: cover;
   border: 2px solid var(--color-border);
 }
@@ -504,21 +511,22 @@ function closeMenus() {
   transform: rotate(180deg);
 }
 
-/* === USER DROPDOWN === */
+/* === DROPDOWN === */
 .user-dropdown {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  min-width: 280px;
+  width: 280px;
   background: rgba(43, 27, 24, 0.95);
-  backdrop-filter: blur(20px);
   border: 2px solid var(--color-border);
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  z-index: 1000;
 }
 
 .user-dropdown-open {
@@ -537,21 +545,22 @@ function closeMenus() {
 .dropdown-avatar {
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  border-radius: 8px;
   object-fit: cover;
   border: 2px solid var(--color-border);
 }
 
 .dropdown-user-info {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
 .dropdown-name {
   font-size: 16px;
   font-weight: 600;
   color: var(--color-light);
+  margin-bottom: 4px;
 }
 
 .dropdown-email {
@@ -570,49 +579,54 @@ function closeMenus() {
   align-items: center;
   gap: 12px;
   padding: 12px 20px;
-  color: var(--color-gray);
+  color: var(--color-light);
   text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
   border: none;
-  background: none;
+  background: transparent;
   width: 100%;
   text-align: left;
   cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
 }
 
 .dropdown-item:hover {
-  color: var(--color-light);
-  background: rgba(245, 224, 185, 0.1);
-}
-
-.logout-item:hover {
-  color: var(--color-danger);
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(249, 131, 58, 0.1);
+  color: var(--color-orange);
 }
 
 .dropdown-icon {
   width: 18px;
   height: 18px;
+  flex-shrink: 0;
 }
 
-/* === MOBILE === */
+.logout-item {
+  color: #ef4444;
+  border-top: 1px solid var(--color-border);
+  margin-top: 8px;
+}
+
+.logout-item:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+/* === MOBILE MENU === */
 .mobile-menu-button {
   display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-  background: none;
+  background: transparent;
   border: none;
   color: var(--color-light);
   cursor: pointer;
+  padding: 8px;
   border-radius: 8px;
   transition: all 0.2s ease;
 }
 
 .mobile-menu-button:hover {
-  background: rgba(245, 224, 185, 0.1);
+  background: rgba(249, 131, 58, 0.1);
+  color: var(--color-orange);
 }
 
 .mobile-icon {
@@ -626,79 +640,58 @@ function closeMenus() {
   left: 0;
   right: 0;
   background: rgba(43, 27, 24, 0.95);
-  backdrop-filter: blur(20px);
   border-bottom: 2px solid var(--color-border);
-  transform: translateY(-100%);
+  backdrop-filter: blur(20px);
   opacity: 0;
   visibility: hidden;
-  transition: all 0.3s ease;
-  max-height: calc(100vh - 80px);
-  overflow-y: auto;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+  z-index: 999;
 }
 
 .mobile-menu-open {
-  transform: translateY(0);
   opacity: 1;
   visibility: visible;
+  transform: translateY(0);
 }
 
 .mobile-nav {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.mobile-tabs {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--color-border);
+  padding: 20px 32px;
 }
 
 .mobile-nav-link {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px;
-  color: var(--color-gray);
+  padding: 12px 16px;
+  color: var(--color-light);
   text-decoration: none;
   border-radius: 8px;
-  font-weight: 500;
   transition: all 0.2s ease;
   border: none;
-  background: none;
+  background: transparent;
   width: 100%;
   text-align: left;
   cursor: pointer;
+  font-size: 16px;
+  margin-bottom: 8px;
 }
 
-.mobile-nav-link:hover {
-  color: var(--color-light);
-  background: rgba(245, 224, 185, 0.1);
-}
-
+.mobile-nav-link:hover,
 .mobile-nav-link-active {
-  color: var(--color-orange);
   background: rgba(249, 131, 58, 0.1);
-  border: 1px solid rgba(249, 131, 58, 0.3);
-}
-
-.logout-mobile:hover {
-  color: var(--color-danger);
-  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-orange);
 }
 
 .mobile-nav-icon {
   width: 20px;
   height: 20px;
+  flex-shrink: 0;
 }
 
 .mobile-user {
   border-top: 1px solid var(--color-border);
-  padding: 20px;
+  padding: 20px 32px;
 }
 
 .mobile-user-info {
@@ -711,24 +704,25 @@ function closeMenus() {
 .mobile-user-avatar {
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  border-radius: 8px;
   object-fit: cover;
   border: 2px solid var(--color-border);
 }
 
 .mobile-user-details {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex: 1;
 }
 
 .mobile-user-name {
+  display: block;
   font-size: 16px;
   font-weight: 600;
   color: var(--color-light);
+  margin-bottom: 4px;
 }
 
 .mobile-user-email {
+  display: block;
   font-size: 13px;
   color: var(--color-gray);
 }
@@ -739,6 +733,18 @@ function closeMenus() {
   margin: 16px 0;
 }
 
+.logout-mobile {
+  color: #ef4444;
+  border-top: 1px solid var(--color-border);
+  margin-top: 8px;
+  padding-top: 16px;
+}
+
+.logout-mobile:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
 /* === OVERLAY === */
 .menu-overlay {
   position: fixed;
@@ -747,13 +753,25 @@ function closeMenus() {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: -1;
+  z-index: 998;
 }
 
 /* === RESPONSIVE === */
 @media (max-width: 1024px) {
-  .navbar-tabs {
-    display: none; /* Masquer les tabs sur tablette et mobile */
+  .navbar-nav {
+    display: none;
+  }
+
+  .mobile-menu-button {
+    display: block;
+  }
+
+  .user-info {
+    display: none;
+  }
+
+  .user-button {
+    padding: 8px;
   }
 }
 
@@ -761,14 +779,6 @@ function closeMenus() {
   .navbar-container {
     padding: 0 20px;
     height: 70px;
-  }
-
-  .navbar-user {
-    display: none;
-  }
-
-  .mobile-menu-button {
-    display: flex;
   }
 
   .brand-text {
@@ -780,20 +790,34 @@ function closeMenus() {
     height: 40px;
   }
 
-  .logo-image {
-    width: 28px;
-    height: 28px;
+  .user-dropdown {
+    width: 260px;
+  }
+
+  .mobile-nav,
+  .mobile-user {
+    padding: 16px 20px;
   }
 }
 
 @media (max-width: 480px) {
   .navbar-container {
     padding: 0 16px;
+    height: 60px;
   }
 
-  .mobile-nav,
-  .mobile-user {
-    padding: 16px;
+  .brand-logo {
+    width: 32px;
+    height: 32px;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .user-dropdown {
+    width: 240px;
   }
 }
 </style>
