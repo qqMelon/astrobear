@@ -110,6 +110,7 @@ const handleSetMain = event => {
 
 <template>
   <div
+
     :class="[
       'character-card',
       `character-card--${variant}`,
