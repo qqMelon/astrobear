@@ -5,6 +5,7 @@ import { useAuthStore } from '../stores/auth'
 import CharacterCard from '@/components/CharacterCard.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseFilter from '@/components/ui/BaseFilter.vue'
 
 import { getValidBattlenetToken } from '@/helpers/battlenetToken'
 
@@ -18,7 +19,10 @@ const error = ref(null)
 const selectedChar = ref(null)
 const alreadyCalled = ref(false)
 
-// Couleurs des classes WoW (même logique que CharacterCard)
+// 🔍 État du filtre
+const searchQuery = ref('')
+
+// Couleurs des classes WoW
 const classColors = {
   Guerrier: '#C79C6E',
   Paladin: '#F58CBA',
@@ -37,10 +41,93 @@ const classColors = {
 
 const getClassColor = className => classColors[className] || '#FFFFFF'
 
+// Solution finale : Avatar stylisé avec couleur de classe
 const getCharacterAvatar = (character, size = 'avatar') => {
-  if (!character?.name || !character?.realm) return null
-  return `https://render.worldofwarcraft.com/eu/character/${character.realm.toLowerCase().replace(/[^a-z0-9]/g, '')}/${character.name.toLowerCase()}/${size}.jpg`
+  if (!character?.name) {
+    return `https://ui-avatars.com/api/?name=WoW&size=120&background=2B1B18&color=F5E0B9&bold=true&format=png&font-size=0.5`
+  }
+
+  const name = character.name
+  const classColor = getClassColor(character.class)?.replace('#', '') || 'C79C6E'
+  const avatarSize = size === 'main' ? '120' : size === 'large' ? '80' : '64'
+
+  // Créer des initiales stylées
+  let initials = ''
+  if (name.length >= 2) {
+    initials = name.substring(0, 2).toUpperCase()
+  } else {
+    initials = name.charAt(0).toUpperCase()
+  }
+
+  // Avatar avec la couleur de classe et style WoW
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&size=${avatarSize}&background=${classColor}&color=000000&bold=true&format=png&font-size=0.4&length=2&rounded=false`
 }
+
+// Fonction alternative avec des dégradés plus jolis
+const getCharacterAvatarGradient = (character, size = 'avatar') => {
+  if (!character?.name) {
+    return `https://ui-avatars.com/api/?name=WoW&size=120&background=gradient&color=F5E0B9&bold=true&format=png`
+  }
+
+  const name = character.name
+  const avatarSize = size === 'main' ? '120' : size === 'large' ? '80' : '64'
+
+  // Choisir une couleur de fond basée sur la classe
+  const classBackgrounds = {
+    Guerrier: 'C79C6E',
+    Paladin: 'F58CBA',
+    Chasseur: 'ABD473',
+    Voleur: 'FFF569',
+    Prêtre: 'FFFFFF',
+    'Chevalier de la mort': 'C41F3B',
+    Chaman: '0070DE',
+    Mage: '69CCF0',
+    Démoniste: '9482C9',
+    Moine: '00FF96',
+    Druide: 'FF7D0A',
+    'Chasseur de démons': 'A330C9',
+    Évocateur: '33937F',
+  }
+
+  const bgColor = classBackgrounds[character.class] || '2B1B18'
+  const textColor = ['Prêtre', 'Voleur'].includes(character.class) ? '000000' : 'FFFFFF'
+
+  const initials =
+    name.length >= 2 ? name.substring(0, 2).toUpperCase() : name.charAt(0).toUpperCase()
+
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&size=${avatarSize}&background=${bgColor}&color=${textColor}&bold=true&format=png&font-size=0.4&length=2&rounded=true`
+}
+
+// Gestion d'erreur
+const handleImageError = (event, character) => {
+  console.warn('⚠️ Erreur chargement avatar pour:', character?.name)
+  // Fallback simple et fiable
+  const fallbackColor = '2B1B18'
+  const initial = character?.name?.charAt(0)?.toUpperCase() || 'W'
+  event.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initial)}&size=120&background=${fallbackColor}&color=F5E0B9&bold=true&format=png&font-size=0.6`
+}
+
+const handleImageLoad = (event, character) => {
+  console.log('✅ Avatar chargé pour:', character?.name)
+}
+
+// 🔍 Logique de filtrage
+const filteredCharacters = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return sortedCharacters.value
+  }
+
+  const query = searchQuery.value.toLowerCase().trim()
+
+  return sortedCharacters.value.filter(character => {
+    return (
+      character.name?.toLowerCase().includes(query) ||
+      character.realm?.toLowerCase().includes(query) ||
+      character.class?.toLowerCase().includes(query) ||
+      character.race?.toLowerCase().includes(query)
+    )
+  })
+})
 
 const syncCharacters = async function () {
   if (alreadyCalled.value === true) return
@@ -70,10 +157,10 @@ const loadChars = async function () {
   try {
     const data = await pullFromDirectus()
     if (data.data && data.data.length > 0) {
-      console.log('chars data exist from Directus')
+      console.log('📦 Personnages chargés depuis Directus')
       characters.value = data.data
     } else {
-      console.log('chars data doesnt exist, pull from Blizzard API')
+      console.log('🔄 Récupération depuis Blizzard API')
       const toUpload = await pullFromBlizzard()
       await uploadToDirectus(toUpload)
       characters.value = toUpload
@@ -102,11 +189,9 @@ const pullFromDirectus = async function () {
 
   if (!res.ok) {
     throw new Error('Erreur lors du chargement des personnages depuis Directus.')
-    return null
   }
 
   const data = await res.json()
-
   return data
 }
 
@@ -122,7 +207,6 @@ const pullFromBlizzard = async function () {
 
   if (!res.ok) {
     throw new Error('Impossible de charger les personnages.')
-    return null
   }
 
   const data = await res.json()
@@ -276,6 +360,11 @@ const setAsMainCharacter = async char => {
 
 const sortedCharacters = computed(() => [...characters.value].sort((a, b) => b.level - a.level))
 
+// 🧹 Fonction pour nettoyer la recherche
+const clearSearch = () => {
+  searchQuery.value = ''
+}
+
 onMounted(() => {
   if (token) bnetLinked.value = true
   loadChars()
@@ -366,17 +455,56 @@ onMounted(() => {
           <!-- Liste des personnages -->
           <div class="characters-list">
             <BaseCard variant="default" padding="large">
-              <h2 class="section-title">
-                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+              <div class="characters-header">
+                <h2 class="section-title">
+                  <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
+                  </svg>
+                  Vos personnages ({{ filteredCharacters.length }}/{{ sortedCharacters.length }})
+                </h2>
+
+                <!-- 🔍 Barre de recherche -->
+                <div class="search-section">
+                  <BaseFilter
+                    v-model="searchQuery"
+                    placeholder="Rechercher par nom, royaume, classe, race..."
+                    variant="default"
+                    :disabled="isLoading || sortedCharacters.length === 0"
+                    @clear="clearSearch"
                   />
-                </svg>
-                Vos personnages ({{ sortedCharacters.length }})
-              </h2>
+
+                  <!-- Indicateur de recherche active -->
+                  <div
+                    v-if="searchQuery && filteredCharacters.length !== sortedCharacters.length"
+                    class="search-info"
+                  >
+                    <svg
+                      class="search-info-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span
+                      >{{ filteredCharacters.length }} résultat{{
+                        filteredCharacters.length > 1 ? 's' : ''
+                      }}
+                      pour "{{ searchQuery }}"</span
+                    >
+                  </div>
+                </div>
+              </div>
 
               <!-- État vide -->
               <div v-if="sortedCharacters.length === 0 && !isLoading" class="empty-characters">
@@ -394,10 +522,32 @@ onMounted(() => {
                 <p>Cliquez sur "Synchroniser" pour charger vos personnages depuis Battle.net.</p>
               </div>
 
-              <!-- Liste des cartes -->
+              <!-- Aucun résultat de recherche -->
+              <div
+                v-else-if="filteredCharacters.length === 0 && searchQuery"
+                class="empty-characters"
+              >
+                <div class="empty-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div>
+                <h3>Aucun personnage trouvé</h3>
+                <p>Aucun personnage ne correspond à votre recherche "{{ searchQuery }}".</p>
+                <BaseButton variant="secondary" @click="clearSearch">
+                  Effacer la recherche
+                </BaseButton>
+              </div>
+
+              <!-- 🔧 Liste des cartes - CORRECTIF ALIGNEMENT -->
               <div v-else class="characters-grid">
                 <CharacterCard
-                  v-for="char in sortedCharacters"
+                  v-for="char in filteredCharacters"
                   :key="char.char_id"
                   :character="char"
                   :selected="selectedChar?.char_id === char.char_id"
@@ -432,14 +582,13 @@ onMounted(() => {
                     <!-- Avatar principal -->
                     <div class="profile-avatar">
                       <img
-                        :src="getCharacterAvatar(selectedChar, 'main')"
+                        :src="getCharacterAvatarGradient(selectedChar, 'main')"
                         :alt="selectedChar.name"
                         class="profile-image"
-                        @error="
-                          $event.target.src =
-                            'https://via.placeholder.com/120x120/2B1B18/F5E0B9?text=WoW'
-                        "
+                        @error="e => handleImageError(e, selectedChar)"
+                        @load="e => handleImageLoad(e, selectedChar)"
                       />
+
                       <div class="profile-level">{{ selectedChar.level }}</div>
 
                       <!-- Badge Main si applicable -->
@@ -453,6 +602,11 @@ onMounted(() => {
                           />
                         </svg>
                         Main
+                      </div>
+
+                      <!-- Badge classe -->
+                      <div class="profile-class-badge">
+                        {{ selectedChar.class }}
                       </div>
                     </div>
 
@@ -697,7 +851,7 @@ onMounted(() => {
   margin-right: auto;
 }
 
-/* === SYNCHRONISATION === */
+/* 🔧 === CORRECTIONS ALIGNEMENT - SECTION SYNCHRONISATION === */
 .sync-section {
   margin-bottom: 32px;
   display: flex;
@@ -724,7 +878,7 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-/* === LAYOUT === */
+/* 🔧 === CORRECTIONS ALIGNEMENT - LAYOUT === */
 .profile-content {
   display: flex;
   flex-direction: column;
@@ -738,6 +892,57 @@ onMounted(() => {
   align-items: start;
 }
 
+/* 🔧 === CORRECTIONS ALIGNEMENT - CONTENEUR LISTE DES PERSONNAGES === */
+.characters-list {
+  width: 100%;
+  min-width: 0; /* Permet au conteneur de rétrécir si nécessaire */
+  overflow: hidden; /* Empêche le débordement */
+}
+
+/* 🔧 === CORRECTIONS ALIGNEMENT - BASECARD DANS LA LISTE === */
+.characters-list :deep(.base-card) {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 🔧 === CORRECTIONS ALIGNEMENT - HEADER PERSONNAGES AVEC RECHERCHE === */
+.characters-header {
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+}
+
+.search-section {
+  margin-top: 20px;
+  width: 100%;
+}
+
+/* 🔧 Force le BaseFilter à prendre toute la largeur */
+.search-section :deep(.base-filter) {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.search-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: rgba(249, 131, 58, 0.1);
+  border-radius: 8px;
+  color: var(--color-orange);
+  font-size: 14px;
+}
+
+.search-info-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
 /* === SECTIONS === */
 .section-title {
   display: flex;
@@ -746,7 +951,7 @@ onMounted(() => {
   font-size: 24px;
   font-weight: bold;
   color: var(--color-light);
-  margin: 0 0 24px;
+  margin: 0;
 }
 
 .section-icon {
@@ -755,13 +960,25 @@ onMounted(() => {
   color: var(--color-orange);
 }
 
-/* === PERSONNAGES === */
+/* 🔧 === CORRECTIONS ALIGNEMENT - GRILLE DES PERSONNAGES === */
 .characters-grid {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: stretch; /* Force tous les enfants à prendre la même largeur */
 }
 
+/* 🔧 Force chaque CharacterCard à s'aligner parfaitement */
+.characters-grid > * {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+/* === ÉTATS VIDES === */
 .empty-characters,
 .empty-state {
   text-align: center;
@@ -792,6 +1009,12 @@ onMounted(() => {
 }
 
 /* === DÉTAILS DU PERSONNAGE === */
+.character-details {
+  width: 100%;
+  min-width: 0;
+  max-width: 400px; /* 🔧 Empêche l'expansion */
+}
+
 .character-profile {
   display: flex;
   flex-direction: column;
@@ -824,32 +1047,53 @@ onMounted(() => {
   color: var(--color-light);
   font-size: 16px;
   font-weight: bold;
-  padding: 6px 12px;
-  border-radius: 12px;
-  border: 2px solid var(--color-border);
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 2px solid var(--color-dark);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .profile-main-badge {
   position: absolute;
   top: -8px;
-  right: 50%;
-  transform: translateX(50%);
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: #1f2937;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-green);
+  color: var(--color-light);
   font-size: 12px;
   font-weight: bold;
   padding: 4px 8px;
   border-radius: 12px;
+  border: 2px solid var(--color-dark);
   display: flex;
   align-items: center;
   gap: 4px;
-  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .profile-main-badge svg {
   width: 12px;
   height: 12px;
+}
+
+.profile-class-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: rgba(43, 27, 24, 0.9);
+  color: var(--color-light);
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 2px solid var(--color-border);
+  font-size: 10px;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
 }
 
 .profile-info {
@@ -860,43 +1104,40 @@ onMounted(() => {
 
 .info-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  background: rgba(43, 27, 24, 0.6);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
 }
 
-.info-row:hover {
-  background: rgba(43, 27, 24, 0.8);
-  border-color: var(--color-orange);
+.info-row:last-child {
+  border-bottom: none;
 }
 
 .info-label {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 600;
+  font-size: 14px;
   color: var(--color-gray);
+  font-weight: 500;
 }
 
 .info-icon {
   width: 16px;
   height: 16px;
-  color: var(--color-orange);
+  flex-shrink: 0;
 }
 
 .info-value {
-  color: var(--color-light);
+  font-size: 15px;
   font-weight: 600;
-  text-align: right;
+  color: var(--color-light);
 }
 
 .character-name {
+  font-size: 18px;
   font-weight: bold;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .level-value {
@@ -907,35 +1148,24 @@ onMounted(() => {
   font-weight: bold;
 }
 
-.class-value {
-  font-weight: bold;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-}
-
 .main-status {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #10b981;
-  font-weight: bold;
+  color: var(--color-green);
+}
+
+.status-icon {
+  width: 14px;
+  height: 14px;
 }
 
 .secondary-status {
   color: var(--color-gray);
 }
 
-.status-icon {
-  width: 16px;
-  height: 16px;
-}
-
 .profile-actions {
-  margin-top: 8px;
-}
-
-.select-character {
-  text-align: center;
-  padding: 48px 24px;
+  padding-top: 8px;
 }
 
 /* === TRANSITIONS === */
@@ -949,11 +1179,18 @@ onMounted(() => {
   opacity: 0;
 }
 
-/* === RESPONSIVE === */
-@media (max-width: 1024px) {
+/* 🔧 === CORRECTIONS ALIGNEMENT - RESPONSIVE === */
+@media (max-width: 1200px) {
   .characters-layout {
     grid-template-columns: 1fr;
     gap: 24px;
+  }
+
+  /* 🔧 En responsive, tout prend la largeur complète */
+  .characters-list,
+  .character-details {
+    width: 100%;
+    max-width: 100%;
   }
 }
 
@@ -970,30 +1207,30 @@ onMounted(() => {
     font-size: 16px;
   }
 
-  .characters-layout {
-    gap: 20px;
+  .search-section {
+    margin-top: 16px;
+  }
+
+  .characters-header {
+    margin-bottom: 20px;
   }
 
   .section-title {
     font-size: 20px;
   }
 
-  .info-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+  .profile-image {
+    width: 100px;
+    height: 100px;
   }
 
-  .info-value {
-    text-align: left;
+  .profile-level {
+    font-size: 14px;
+    padding: 2px 8px;
   }
 }
 
 @media (max-width: 480px) {
-  .profile-page {
-    padding: 20px 0;
-  }
-
   .profile-container {
     padding: 0 16px;
   }
@@ -1002,9 +1239,20 @@ onMounted(() => {
     font-size: 28px;
   }
 
-  .profile-image {
-    width: 100px;
-    height: 100px;
+  .empty-characters,
+  .empty-state {
+    padding: 32px 16px;
+  }
+
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 16px 0;
+  }
+
+  .info-value {
+    align-self: flex-end;
   }
 }
 </style>
