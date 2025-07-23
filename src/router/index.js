@@ -82,6 +82,10 @@ router.beforeEach(async (to, from, next) => {
       next()
     } catch (err) {
       console.error('Error return to login: ', err)
+      // Si c'est une erreur de token expiré, rediriger vers login
+      if (err.message === 'Token expiré') {
+        console.log('🔐 Token expiré, redirection vers login')
+      }
       next({ name: 'login' })
     }
   } else {
