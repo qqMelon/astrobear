@@ -54,11 +54,45 @@ const classColors = {
 
 const getClassColor = className => classColors[className] || '#FFFFFF'
 
-// Avatar du personnage via l'API Blizzard
-const getCharacterAvatar = (character, size = 'avatar') => {
-  if (!character?.name || !character?.realm) return null
-  // Formats: avatar (64x64), inset (84x84), main (456x456)
-  return `https://render.worldofwarcraft.com/eu/character/${character.realm.toLowerCase().replace(/[^a-z0-9]/g, '')}/${character.name.toLowerCase()}/${size}.jpg`
+// Solution finale : Avatar stylisé avec couleur de classe
+const getCharacterAvatar = (character, variant = 'default') => {
+  if (!character?.name) {
+    return `https://ui-avatars.com/api/?name=WoW&size=64&background=2B1B18&color=F5E0B9&bold=true&format=png&font-size=0.5`
+  }
+
+  const name = character.name
+  const classColor = getClassColor(character.class)?.replace('#', '') || 'C79C6E'
+
+  // Tailles selon le variant
+  let avatarSize = '64'
+  if (variant === 'compact') avatarSize = '48'
+  else if (variant === 'detailed') avatarSize = '120'
+
+  // Créer des initiales stylées
+  let initials = ''
+  if (name.length >= 2) {
+    initials = name.substring(0, 2).toUpperCase()
+  } else {
+    initials = name.charAt(0).toUpperCase()
+  }
+
+  // Choisir la couleur de texte selon la classe
+  const textColor = ['Prêtre', 'Voleur'].includes(character.class) ? '000000' : 'FFFFFF'
+
+  // Avatar avec la couleur de classe et style WoW
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&size=${avatarSize}&background=${classColor}&color=${textColor}&bold=true&format=png&font-size=0.4&length=2&rounded=true`
+}
+
+// Gestion d'erreur fallback
+const handleImageError = (event, character) => {
+  console.warn('⚠️ Erreur chargement avatar pour:', character?.name)
+  const fallbackColor = '2B1B18'
+  const initial = character?.name?.charAt(0)?.toUpperCase() || 'W'
+  event.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initial)}&size=64&background=${fallbackColor}&color=F5E0B9&bold=true&format=png&font-size=0.6`
+}
+
+const handleImageLoad = (event, character) => {
+  console.log('✅ Avatar chargé pour:', character?.name)
 }
 
 // Gestion des clics
@@ -92,10 +126,11 @@ const handleSetMain = event => {
       <!-- Avatar avec niveau -->
       <div class="card-avatar">
         <img
-          :src="getCharacterAvatar(character, 'avatar')"
+          :src="getCharacterAvatar(character, 'default')"
           :alt="character.name"
           class="avatar-image"
-          @error="$event.target.src = 'https://via.placeholder.com/64x64/2B1B18/F5E0B9?text=WoW'"
+          @error="e => handleImageError(e, character)"
+          @load="e => handleImageLoad(e, character)"
         />
         <div class="level-badge">{{ character.level }}</div>
       </div>
@@ -151,10 +186,11 @@ const handleSetMain = event => {
     <template v-else-if="variant === 'compact'">
       <div class="compact-avatar">
         <img
-          :src="getCharacterAvatar(character, 'avatar')"
+          :src="getCharacterAvatar(character, 'compact')"
           :alt="character.name"
           class="compact-image"
-          @error="$event.target.src = 'https://via.placeholder.com/48x48/2B1B18/F5E0B9?text=WoW'"
+          @error="e => handleImageError(e, character)"
+          @load="e => handleImageLoad(e, character)"
         />
         <div class="compact-level">{{ character.level }}</div>
       </div>
@@ -173,10 +209,11 @@ const handleSetMain = event => {
     <template v-else-if="variant === 'detailed'">
       <div class="detailed-header">
         <img
-          :src="getCharacterAvatar(character, 'main')"
+          :src="getCharacterAvatar(character, 'detailed')"
           :alt="character.name"
           class="detailed-image"
-          @error="$event.target.src = 'https://via.placeholder.com/120x120/2B1B18/F5E0B9?text=WoW'"
+          @error="e => handleImageError(e, character)"
+          @load="e => handleImageLoad(e, character)"
         />
         <div class="detailed-info">
           <h3 class="detailed-name" :style="{ color: getClassColor(character.class) }">
