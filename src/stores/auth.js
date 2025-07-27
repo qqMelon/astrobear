@@ -1,8 +1,12 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { useToastStore } from '@/stores/toast'
+//import { useRouter } from 'vue-router'
+import router from '@/router/index.js'
 
 import API from '@/helpers/axios'
+
+//const router = useRouter()
 
 const API_URL = import.meta.env.VITE_BACKEND_BASE_URL
 
@@ -71,6 +75,7 @@ export const useAuthStore = defineStore('auth', {
       this.user = null
       this.token = ''
       localStorage.removeItem('astrobear-user-token')
+      router.push({ name: 'login' })
     },
 
     isAuthenticated() {

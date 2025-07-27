@@ -91,9 +91,9 @@ const handleImageError = (event, character) => {
   event.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initial)}&size=64&background=${fallbackColor}&color=F5E0B9&bold=true&format=png&font-size=0.6`
 }
 
-const handleImageLoad = (event, character) => {
-  console.log('✅ Avatar chargé pour:', character?.name)
-}
+//const handleImageLoad = (event, character) => {
+//  console.log('✅ Avatar chargé pour:', character?.name)
+//}
 
 // Gestion des clics
 const handleClick = () => {
@@ -131,7 +131,6 @@ const handleSetMain = event => {
           :alt="character.name"
           class="avatar-image"
           @error="e => handleImageError(e, character)"
-          @load="e => handleImageLoad(e, character)"
         />
         <div class="level-badge">{{ character.level }}</div>
       </div>

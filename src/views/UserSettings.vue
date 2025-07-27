@@ -50,8 +50,6 @@ function openModal(type) {
 
 onMounted(() => {
   const token = getValidBattlenetToken()
-  console.log('test hook mounted on userprofile for bnet token: ', token)
-
   if (token) bnetLinked.value = true
 })
 </script>

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useAuthStore } from '../stores/auth'
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from  'vue-router'
 
 import CharacterCard from '@/components/CharacterCard.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
@@ -9,7 +10,10 @@ import BaseFilter from '@/components/ui/BaseFilter.vue'
 
 import { getValidBattlenetToken } from '@/helpers/battlenetToken'
 
+import API from '@/helpers/axios'
+
 const authStore = useAuthStore()
+const router = useRouter()
 const token = getValidBattlenetToken()
 const authToken = authStore.token || localStorage.getItem('astrobear-user-token')
 const bnetLinked = ref(false)
@@ -107,9 +111,9 @@ const handleImageError = (event, character) => {
   event.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initial)}&size=120&background=${fallbackColor}&color=F5E0B9&bold=true&format=png&font-size=0.6`
 }
 
-const handleImageLoad = (event, character) => {
-  console.log('✅ Avatar chargé pour:', character?.name)
-}
+//const handleImageLoad = (event, character) => {
+//  console.log('✅ Avatar chargé pour:', character?.name)
+//}
 
 // 🔍 Logique de filtrage
 const filteredCharacters = computed(() => {
@@ -148,15 +152,9 @@ const loadChars = async function () {
   isLoading.value = true
   error.value = null
 
-  if (!token) {
-    error.value = 'Token Battlenet invalide ou expiré.'
-    isLoading.value = false
-    return
-  }
-
   try {
     const data = await pullFromDirectus()
-    if (data.data && data.data.length > 0) {
+    if ((data.data && data.data.length > 0) || !token ) {
       console.log('📦 Personnages chargés depuis Directus')
       characters.value = data.data
     } else {
@@ -177,6 +175,7 @@ const loadChars = async function () {
 }
 
 const pullFromDirectus = async function () {
+//  const res = await API.get(`/items/wow_characters?filter[user][_eq]=${authStore.user.id}`)
   const res = await fetch(
     import.meta.env.VITE_BACKEND_BASE_URL +
       `/items/wow_characters?filter[user][_eq]=${authStore.user.id}`,
@@ -186,7 +185,6 @@ const pullFromDirectus = async function () {
       },
     }
   )
-
   if (!res.ok) {
     throw new Error('Erreur lors du chargement des personnages depuis Directus.')
   }
@@ -383,7 +381,7 @@ onMounted(() => {
       </div>
 
       <!-- État non lié -->
-      <BaseCard v-if="!bnetLinked" variant="hover" padding="large">
+      <BaseCard v-if="!bnetLinked && !characters" variant="hover" padding="large">
         <div class="empty-state">
           <div class="empty-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -406,6 +404,7 @@ onMounted(() => {
         <!-- Bouton de synchronisation -->
         <div class="sync-section">
           <BaseButton
+            v-if="token"
             variant="primary"
             :loading="isLoading"
             :disabled="alreadyCalled"
@@ -432,6 +431,15 @@ onMounted(() => {
                   ? 'Patientez avant de relancer'
                   : 'Synchroniser mes personnages'
             }}
+          </BaseButton>
+          <BaseButton
+            v-else
+            variant="primary"
+            :loading="isLoading"
+            :disabled="alreadyCalled"
+            @click="router.push({ name: 'user-settings' })"
+          >
+            Vous ne pouvez pas synchroniser vos personnages sans Jeton Battle.net (Récupérer un Jeton)
           </BaseButton>
         </div>
 
@@ -586,7 +594,6 @@ onMounted(() => {
                         :alt="selectedChar.name"
                         class="profile-image"
                         @error="e => handleImageError(e, selectedChar)"
-                        @load="e => handleImageLoad(e, selectedChar)"
                       />
 
                       <div class="profile-level">{{ selectedChar.level }}</div>
