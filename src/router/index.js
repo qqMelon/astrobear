@@ -66,14 +66,13 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
+  console.log('Router guard log: ', to, from)
   const auth = useAuthStore()
-
   if (to.meta.requiresAuth) {
     if (!auth.isAuthenticated()) {
       console.log('Non authentifié → login')
       return next({ name: 'login' })
     }
-
     try {
       if (!auth.user) {
         console.log('Pas de user, tentative de récupération...')
@@ -82,7 +81,6 @@ router.beforeEach(async (to, from, next) => {
       return next()
     } catch (err) {
       console.warn('❌ Token peut-être expiré, tentative de refresh...')
-
       const refreshed = await auth.refreshAccessToken()
       if (refreshed) {
         try {

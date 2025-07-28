@@ -9,7 +9,6 @@ import Navbar from '@/components/Navbar.vue'
 const auth = useAuthStore()
 const route = useRoute()
 
-// Afficher la navbar seulement si l'utilisateur est connecté ET n'est pas sur la page login
 const showNavbar = computed(() => {
   return auth.isAuthenticated() && route.name !== 'login'
 })

@@ -276,7 +276,7 @@ const healthPercent = computed(() => {
 }
 
 .boss-image {
-  max-width: 90%; /* Légèrement réduit pour laisser de l'espace */
+  max-width: 200%; /* Légèrement réduit pour laisser de l'espace */
   max-height: 300px; /* Hauteur maximale pour l'image */
   object-fit: contain;
   animation: float 6s ease-in-out infinite;
