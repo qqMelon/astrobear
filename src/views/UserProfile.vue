@@ -145,7 +145,27 @@ const syncCharacters = async function () {
   await syncToDirectus(toCreate, toUpdate)
 
   characters.value = updateCharList
+  for (const char of characters.value) {
+      const isMain = char.id === authStore.user.main_character?.char_id
+      if (isMain && char.href) {
+        try {
+          const res = await API.get(char.href, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            params: { locale: 'fr_FR' },
+          })
+
+          console.log('Main char: ', res)
+          // await updateCharacterInDirectus(char.id, res.data) // ta propre fonction
+        } catch (err) {
+          console.error('Erreur de mise à jour du main:', err)
+        }
+      }
+  }
+
   alreadyCalled.value = true
+
   setTimeout(() => {
     alreadyCalled.value = false
   }, 15000)
@@ -212,6 +232,7 @@ const pullFromBlizzard = async function () {
 
   const data = await res.json()
   const formattedData = data.wow_accounts[0].characters.map(char => ({
+    id: char.id,
     char_id: char.id,
     name: char.name,
     level: char.level,
