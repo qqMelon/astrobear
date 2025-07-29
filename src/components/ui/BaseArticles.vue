@@ -23,8 +23,6 @@ const props = defineProps({
 const sortedArticles = computed(() => {
   return [...props.articles].sort((a, b) => new Date(b.date) - new Date(a.date))
 })
-
-console.log('BaseArticles - Articles reçus:', props.articles)
 </script>
 
 <template>

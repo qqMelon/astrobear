@@ -8,6 +8,7 @@ const router = useRouter()
 
 //  Utilise computed pour la réactivité
 const user = computed(() => auth.user)
+const user_mc = computed(() => auth.mainChar)
 const beurl = import.meta.env.VITE_BACKEND_BASE_URL
 const showMobile = ref(false)
 const showUserMenu = ref(false)
@@ -136,8 +137,8 @@ function closeMenus() {
       <div v-if="user" class="navbar-user">
         <button class="user-button" @click="toggleUserMenu">
           <div class="user-info">
-            <span class="user-name">{{ user.first_name }}</span>
-            <span class="user-role">Membre</span>
+            <span class="user-name">{{ user_mc.name || user.first_name }}</span>
+            <span class="user-role">{{ user.role.name }}</span>
           </div>
           <img :src="userAvatar" :alt="user.first_name || 'Utilisateur'" class="user-avatar" />
           <svg

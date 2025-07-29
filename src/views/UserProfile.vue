@@ -1,7 +1,9 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useAuthStore } from '@/stores/auth'
 import { useRouter } from  'vue-router'
+
+import { useAuthStore } from '@/stores/auth'
+import { useToastStore } from '@/stores/toast'
 
 import CharacterCard from '@/components/CharacterCard.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
@@ -12,6 +14,7 @@ import { getValidBattlenetToken } from '@/helpers/battlenetToken'
 
 import API from '@/helpers/axios'
 
+const toastStore = useToastStore()
 const authStore = useAuthStore()
 const router = useRouter()
 const token = getValidBattlenetToken()
@@ -353,6 +356,29 @@ const setAsMainCharacter = async char => {
     console.log(`✅ ${char.name} est maintenant le personnage principal.`)
   } catch (err) {
     console.error('❌ Erreur lors de la définition du personnage principal:', err)
+  }
+
+  try {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/users/me`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        main_character: char.id,
+      }),
+    })
+
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(err?.errors?.[0]?.message || 'Erreur lors de la mise à jour')
+    }
+
+    toastStore.showSuccess('Le personnage principal à bien été mise à jour')
+    await authStore.fetchUser()
+  } catch (err) {
+    console.error('❌ Erreur setAsMainCharacter:', err)
   }
 }
 
