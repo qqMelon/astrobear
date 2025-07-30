@@ -67,7 +67,6 @@ Contactez un officier en jeu !`,
 
   // Toujours utiliser les articles de démo pour le debug
   articles.value = demoArticles
-  console.log('Articles chargés dans Dashboard:', articles.value)
 })
 
 // Computed pour les stats rapides

@@ -19,6 +19,9 @@ const bnetLinked = ref(false)
 const showModal = ref(false)
 const modalContent = ref('')
 
+const defaultAvatar =
+  'https://ui-avatars.com/api/?name=User&size=40&background=2B1B18&color=F5E0B9&bold=true&format=png&font-size=0.6'
+
 const fullName = computed(() => {
   return [user.first_name, user.last_name].filter(Boolean).join(' ')
 })
@@ -61,7 +64,7 @@ onMounted(() => {
       <header class="settings-header">
         <div class="header-content">
           <div class="user-avatar">
-            <img v-if="user?.pp" :src="user.pp" alt="Avatar" class="avatar-image" />
+            <img v-if="user.avatar_char_url" :src="user.avatar_char_url" alt="Avatar" class="avatar-image" />
             <div v-else class="avatar-placeholder">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path
@@ -72,19 +75,10 @@ onMounted(() => {
                 />
               </svg>
             </div>
-            <div class="avatar-badge">
-              <svg viewBox="0 0 20 20" fill="currentColor">
-                <path
-                  fill-rule="evenodd"
-                  d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </div>
           </div>
 
           <div class="user-info">
-            <h1 class="user-name">{{ fullName }}</h1>
+            <h1 class="user-name">{{ user.main_character.name }}</h1>
             <p class="user-email">{{ user.email }}</p>
             <div class="user-role">
               <span class="role-badge">{{ user.role?.name || 'Membre' }}</span>

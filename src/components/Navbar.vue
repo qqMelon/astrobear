@@ -8,6 +8,7 @@ const router = useRouter()
 
 //  Utilise computed pour la réactivité
 const user = computed(() => auth.user)
+const user_mc = computed(() => auth.mainChar)
 const beurl = import.meta.env.VITE_BACKEND_BASE_URL
 const showMobile = ref(false)
 const showUserMenu = ref(false)
@@ -16,42 +17,6 @@ const isScrolled = ref(false)
 // Avatar par défaut fiable qui ne génère pas d'erreur
 const defaultAvatar =
   'https://ui-avatars.com/api/?name=User&size=40&background=2B1B18&color=F5E0B9&bold=true&format=png&font-size=0.6'
-const userAvatar = ref(defaultAvatar)
-
-async function fetchAvatar() {
-  if (!user.value?.avatar || !auth.token) {
-    userAvatar.value = defaultAvatar
-    return
-  }
-
-  try {
-    const response = await fetch(`${beurl}/assets/${user.value.avatar}`, {
-      headers: {
-        Authorization: `Bearer ${auth.token}`,
-      },
-    })
-
-    if (!response.ok) throw new Error('Erreur chargement avatar')
-
-    const blob = await response.blob()
-    userAvatar.value = URL.createObjectURL(blob)
-    auth.setProfilePicture(userAvatar.value)
-  } catch (err) {
-    console.error('Erreur chargement avatar: ', err)
-    userAvatar.value = defaultAvatar
-  }
-}
-
-//  Watcher pour rafraîchir l'avatar quand l'utilisateur change
-watch(
-  user,
-  newUser => {
-    if (newUser) {
-      fetchAvatar()
-    }
-  },
-  { immediate: true }
-)
 
 // Gestion du scroll pour effet glassmorphism
 function handleScroll() {
@@ -148,10 +113,10 @@ function closeMenus() {
       <div v-if="user" class="navbar-user">
         <button class="user-button" @click="toggleUserMenu">
           <div class="user-info">
-            <span class="user-name">{{ user.first_name }}</span>
-            <span class="user-role">Membre</span>
+            <span class="user-name">{{ user_mc.name || user.first_name }}</span>
+            <span class="user-role">{{ user.role.name }}</span>
           </div>
-          <img :src="userAvatar" :alt="user.first_name || 'Utilisateur'" class="user-avatar" />
+          <img :src="user.avatar_char_url || defaultAvatar" :alt="user.first_name || 'Utilisateur'" class="user-avatar" />
           <svg
             class="chevron-icon"
             :class="{ 'chevron-rotated': showUserMenu }"
@@ -172,7 +137,7 @@ function closeMenus() {
         <div class="user-dropdown" :class="{ 'user-dropdown-open': showUserMenu }">
           <div class="dropdown-header">
             <img
-              :src="userAvatar"
+              :src="user.avatar_char_url || defaultAvatar"
               :alt="user.first_name || 'Utilisateur'"
               class="dropdown-avatar"
             />
@@ -315,7 +280,7 @@ function closeMenus() {
       <div v-if="user" class="mobile-user">
         <div class="mobile-user-info">
           <img
-            :src="userAvatar"
+            :src="user.avatar_char_url || defaultAvatar"
             :alt="user.first_name || 'Utilisateur'"
             class="mobile-user-avatar"
           />

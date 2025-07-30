@@ -13,6 +13,7 @@ const API_URL = import.meta.env.VITE_BACKEND_BASE_URL
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
+    mainChar: null,
     token: localStorage.getItem('astrobear-user-token') || '',
     refreshToken: localStorage.getItem('astrobear-user-refreshToken') || '',
   }),
@@ -41,15 +42,22 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async fetchUser() {
-      const res = await API.get('/users/me?fields=id,first_name,last_name,email,role.name,avatar')
-      this.user = res.data.data
+      try {
+        const res = await API.get('/users/me?fields=id,first_name,last_name,email,role.name,avatar,main_character.*,avatar_char_url')
+        const data = res.data.data
+        this.user = data
+        if (data.main_character) this.mainChar = data.main_character
+      } catch (err) {
+        console.error('❌ Échec du refresh token:', err)
+        this.logout()
+      }
     },
 
     async refreshAccessToken() {
       if (!this.refreshToken) return false
 
       try {
-        const res = await API.post('/auth/refresh', {
+        const res = await axios.post(`${API_URL}/auth/refresh`, {
           refresh_token: this.refreshToken,
         })
 
@@ -61,7 +69,7 @@ export const useAuthStore = defineStore('auth', {
 
         return true
       } catch (err) {
-        console.error('Echec du refresh token: ', err)
+        console.error('❌ Échec du refresh token:', err)
         this.logout()
         return false
       }
@@ -75,6 +83,7 @@ export const useAuthStore = defineStore('auth', {
       this.user = null
       this.token = ''
       localStorage.removeItem('astrobear-user-token')
+      localStorage.removeItem('astrobear-user-refreshToken')
       router.push({ name: 'login' })
     },
 

@@ -1,7 +1,9 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useAuthStore } from '@/stores/auth'
 import { useRouter } from  'vue-router'
+
+import { useAuthStore } from '@/stores/auth'
+import { useToastStore } from '@/stores/toast'
 
 import CharacterCard from '@/components/CharacterCard.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
@@ -12,6 +14,7 @@ import { getValidBattlenetToken } from '@/helpers/battlenetToken'
 
 import API from '@/helpers/axios'
 
+const toastStore = useToastStore()
 const authStore = useAuthStore()
 const router = useRouter()
 const token = getValidBattlenetToken()
@@ -157,6 +160,9 @@ const loadChars = async function () {
     if ((data.data && data.data.length > 0) || !token ) {
       console.log('📦 Personnages chargés depuis Directus')
       characters.value = data.data
+      characters.value.forEach((char) => {
+        if (char.is_main) selectedChar.value = char
+      })
     } else {
       console.log('🔄 Récupération depuis Blizzard API')
       const toUpload = await pullFromBlizzard()
@@ -209,6 +215,7 @@ const pullFromBlizzard = async function () {
 
   const data = await res.json()
   const formattedData = data.wow_accounts[0].characters.map(char => ({
+    id: char.id,
     char_id: char.id,
     name: char.name,
     level: char.level,
@@ -349,10 +356,62 @@ const setAsMainCharacter = async char => {
       is_main: c.id === char.id,
     }))
     selectedChar.value = { ...char, is_main: true }
-
-    console.log(`✅ ${char.name} est maintenant le personnage principal.`)
   } catch (err) {
     console.error('❌ Erreur lors de la définition du personnage principal:', err)
+  }
+
+  try {
+    const res = await fetch(
+      `https://eu.api.blizzard.com/profile/wow/character/${char.realm.toLowerCase()}/${char.name.toLowerCase()}/character-media?namespace=profile-eu&locale=fr_FR`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    const a = await res.json()
+    const update = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/users/me`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        avatar_char_url: a.assets[0].value,
+        avatar_inset_char_url: a.assets[1].value,
+        avatar_mainraw_char_url: a.assets[2].value
+      }),
+    })
+    if (!update.ok) {
+      const err = await update.json()
+      throw new Error(err?.errors?.[0]?.message || 'Erreur lors de la mise à jour')
+    }
+  } catch (err) {
+    console.error('Error to retreived assets', err) 
+  }
+
+  try {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/users/me`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        main_character: char.id
+      }),
+    })
+
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(err?.errors?.[0]?.message || 'Erreur lors de la mise à jour')
+    }
+
+    toastStore.showSuccess('Le personnage principal à bien été mise à jour')
+    await authStore.fetchUser()
+  } catch (err) {
+    console.error('❌ Erreur setAsMainCharacter:', err)
   }
 }
 

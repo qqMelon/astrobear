@@ -19,14 +19,21 @@ API.interceptors.response.use(
     const auth = useAuthStore()
     const originalRequest = error.config
 
-    if (error.response?.status === 401 && !originalRequest._retry && auth.refreshToken) {
+    // ⚠️ Disabling refresh on refresh endpoint
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url.includes('/auth/refresh') &&
+      auth.refreshToken
+    ) {
       originalRequest._retry = true
       const success = await auth.refreshAccessToken()
       if (success) {
         originalRequest.headers.Authorization = `Bearer ${auth.token}`
-        return axios(originalRequest)
+        return API(originalRequest)
       } else {
         auth.logout()
+        return Promise.reject(error)
       }
     }
 
