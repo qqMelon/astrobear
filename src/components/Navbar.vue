@@ -17,7 +17,6 @@ const isScrolled = ref(false)
 // Avatar par défaut fiable qui ne génère pas d'erreur
 const defaultAvatar =
   'https://ui-avatars.com/api/?name=User&size=40&background=2B1B18&color=F5E0B9&bold=true&format=png&font-size=0.6'
-const userAvatar = ref(user.avatar_char_url || defaultAvatar)
 
 // Gestion du scroll pour effet glassmorphism
 function handleScroll() {
@@ -105,7 +104,7 @@ function closeMenus() {
             <span class="user-name">{{ user_mc.name || user.first_name }}</span>
             <span class="user-role">{{ user.role.name }}</span>
           </div>
-          <img :src="userAvatar" :alt="user.first_name || 'Utilisateur'" class="user-avatar" />
+          <img :src="user.avatar_char_url || defaultAvatar" :alt="user.first_name || 'Utilisateur'" class="user-avatar" />
           <svg
             class="chevron-icon"
             :class="{ 'chevron-rotated': showUserMenu }"
@@ -126,7 +125,7 @@ function closeMenus() {
         <div class="user-dropdown" :class="{ 'user-dropdown-open': showUserMenu }">
           <div class="dropdown-header">
             <img
-              :src="userAvatar"
+              :src="user.avatar_char_url || defaultAvatar"
               :alt="user.first_name || 'Utilisateur'"
               class="dropdown-avatar"
             />
@@ -252,7 +251,7 @@ function closeMenus() {
       <div v-if="user" class="mobile-user">
         <div class="mobile-user-info">
           <img
-            :src="userAvatar"
+            :src="user.avatar_char_url || defaultAvatar"
             :alt="user.first_name || 'Utilisateur'"
             class="mobile-user-avatar"
           />
