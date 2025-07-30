@@ -17,42 +17,7 @@ const isScrolled = ref(false)
 // Avatar par défaut fiable qui ne génère pas d'erreur
 const defaultAvatar =
   'https://ui-avatars.com/api/?name=User&size=40&background=2B1B18&color=F5E0B9&bold=true&format=png&font-size=0.6'
-const userAvatar = ref(defaultAvatar)
-
-async function fetchAvatar() {
-  if (!user.value?.avatar || !auth.token) {
-    userAvatar.value = defaultAvatar
-    return
-  }
-
-  try {
-    const response = await fetch(`${beurl}/assets/${user.value.avatar}`, {
-      headers: {
-        Authorization: `Bearer ${auth.token}`,
-      },
-    })
-
-    if (!response.ok) throw new Error('Erreur chargement avatar')
-
-    const blob = await response.blob()
-    userAvatar.value = URL.createObjectURL(blob)
-    auth.setProfilePicture(userAvatar.value)
-  } catch (err) {
-    console.error('Erreur chargement avatar: ', err)
-    userAvatar.value = defaultAvatar
-  }
-}
-
-//  Watcher pour rafraîchir l'avatar quand l'utilisateur change
-watch(
-  user,
-  newUser => {
-    if (newUser) {
-      fetchAvatar()
-    }
-  },
-  { immediate: true }
-)
+const userAvatar = ref(user.avatar_char_url || defaultAvatar)
 
 // Gestion du scroll pour effet glassmorphism
 function handleScroll() {

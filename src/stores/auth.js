@@ -43,7 +43,7 @@ export const useAuthStore = defineStore('auth', {
 
     async fetchUser() {
       try {
-        const res = await API.get('/users/me?fields=id,first_name,last_name,email,role.name,avatar,main_character.*')
+        const res = await API.get('/users/me?fields=id,first_name,last_name,email,role.name,avatar,main_character.*,avatar_char_url')
         const data = res.data.data
         this.user = data
         if (data.main_character) this.mainChar = data.main_character
