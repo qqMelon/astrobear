@@ -7,12 +7,22 @@ import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseArticles from '@/components/ui/BaseArticles.vue'
 import ProgressCard from '@/components/ProgressCard.vue'
 import RaidCalendar from '@/components/RaidCalendar.vue'
+import CardArticle from '@/components/CardArticle.vue'
+
+import API from '@/helpers/axios'
 
 const guildStore = useGuildStore()
 const articles = ref([])
 
+const loadArticles = async function () {
+  const res = await API.get(`/items/articles`)
+  console.log('receive articles from Directus: ', res.data) 
+  articles.value = res.data
+}
+
 onMounted(async () => {
   await guildStore.fetchAllData()
+  await loadArticles()
 
   // Articles de démonstration pour tester l'affichage
   const demoArticles = [
@@ -66,7 +76,7 @@ Contactez un officier en jeu !`,
   ]
 
   // Toujours utiliser les articles de démo pour le debug
-  articles.value = demoArticles
+  // articles.value = demoArticles
 })
 
 // Computed pour les stats rapides
@@ -181,27 +191,14 @@ const quickStats = computed(() => {
             <button class="btn-secondary">Voir tout</button>
           </div>
           <div class="section-content">
-            <BaseArticles
-              v-if="articles.length > 0"
-              :articles="articles"
-              variant="default"
-              :show-meta="false"
-            />
+            <div v-if="articles.length > 0" class="base-articles">
+              <div class="articles-list">
+                <div v-for="(article, index) in articles" :key="index" class="articles-item">
+                  <CardArticle />
+                </div>
+              </div>
+            </div>
             <div v-else class="articles-placeholder">
-              <div class="placeholder-item">
-                <div class="placeholder-avatar"></div>
-                <div class="placeholder-content">
-                  <div class="placeholder-title"></div>
-                  <div class="placeholder-text"></div>
-                </div>
-              </div>
-              <div class="placeholder-item">
-                <div class="placeholder-avatar"></div>
-                <div class="placeholder-content">
-                  <div class="placeholder-title"></div>
-                  <div class="placeholder-text"></div>
-                </div>
-              </div>
               <div class="placeholder-item">
                 <div class="placeholder-avatar"></div>
                 <div class="placeholder-content">
