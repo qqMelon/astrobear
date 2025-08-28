@@ -17,7 +17,7 @@ const articles = ref([])
 const loadArticles = async function () {
   const res = await API.get(`/items/articles`)
   console.log('receive articles from Directus: ', res.data) 
-  articles.value = res.data
+  articles.value = res.data.data
 }
 
 onMounted(async () => {
@@ -74,9 +74,6 @@ Contactez un officier en jeu !`,
       isGithubRelease: false,
     },
   ]
-
-  // Toujours utiliser les articles de démo pour le debug
-  // articles.value = demoArticles
 })
 
 // Computed pour les stats rapides
@@ -186,7 +183,7 @@ const quickStats = computed(() => {
                   />
                 </svg>
               </div>
-              <h2>📰 Derniers Articles</h2>
+              <h2>Derniers Articles</h2>
             </div>
             <button class="btn-secondary">Voir tout</button>
           </div>
@@ -194,7 +191,8 @@ const quickStats = computed(() => {
             <div v-if="articles.length > 0" class="base-articles">
               <div class="articles-list">
                 <div v-for="(article, index) in articles" :key="index" class="articles-item">
-                  <CardArticle />
+                  <CardArticle :article="article" />
+                  ---
                 </div>
               </div>
             </div>
