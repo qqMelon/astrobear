@@ -26,7 +26,7 @@ export const useGuildStore = defineStore('guild', () => {
       lastEncounter.value = nm.encounters.find(e => !e.isKilled)
       lastEncounter.value.difficulty = 'normal'
     } else if (hm?.encounters && hm.encounters.find(e => !e.isKilled)) {
-      lastEncounter.value = nm.encounters.find(e => !e.isKilled)
+      lastEncounter.value = hm.encounters.find(e => !e.isKilled)
       lastEncounter.value.difficulty = 'heroic'
     } else {
       lastEncounter.value = hm?.encounters.slice(-1).pop()

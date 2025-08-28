@@ -54,9 +54,9 @@ const healthPercent = computed(() => {
           <!-- Health Bar (si pas fini) -->
           <div v-if="!isFinished" class="health-bar-container">
             <div class="health-bar">
-              <div class="health-fill" :style="{ width: `${healthPercent}%` }"></div>
+              <div class="health-fill" :style="{ width: `${guildStore.lastEncounter.bestPercent}%` }"></div>
               <span class="health-text"
-                >{{ guildStore.lastEncounter.bestPercent }}% de vie restante</span
+                >{{ guildStore.lastEncounter.bestPercent }}%</span
               >
             </div>
           </div>
@@ -161,23 +161,8 @@ const healthPercent = computed(() => {
             </div>
             <div class="stat-content">
               <span class="stat-label">Difficulté</span>
-              <span class="stat-value">Mythique</span>
+              <span class="stat-value">{{ guildStore.lastEncounter.difficulty }}</span>
             </div>
-          </div>
-        </div>
-
-        <!-- Progress Bar (version alternative pour la section info) -->
-        <div v-if="!isFinished" class="progress-summary">
-          <div class="progress-bar-mini">
-            <div class="progress-track">
-              <div
-                class="progress-thumb"
-                :style="{ left: `${guildStore.lastEncounter.bestPercent}%` }"
-              ></div>
-            </div>
-            <span class="progress-label"
-              >{{ guildStore.lastEncounter.bestPercent }}% de progression</span
-            >
           </div>
         </div>
       </div>
@@ -293,7 +278,7 @@ const healthPercent = computed(() => {
 
 .health-bar {
   position: relative;
-  height: 12px;
+  height: 15px;
   background: rgba(0, 0, 0, 0.6);
   border-radius: 6px;
   overflow: hidden;
@@ -309,12 +294,14 @@ const healthPercent = computed(() => {
 
 .health-text {
   position: absolute;
-  top: -25px;
-  left: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   color: var(--color-light);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
 }
 
 /* === FINISHED BADGE === */
