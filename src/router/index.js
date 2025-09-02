@@ -50,6 +50,15 @@ const router = createRouter({
       },
     },
     {
+      path: '/article/:slug',
+      name: 'article-detail',
+      component: () => import('./../views/ArticleDetail.vue'),
+      props: true,
+      meta: {
+        requiresAuth: true,
+      },
+    },
+    {
       path: '/auth/discord/callback',
       name: 'discord-callback',
       component: () => import('./../views/callbacks/DiscordCallback.vue'),

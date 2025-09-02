@@ -23,57 +23,6 @@ const loadArticles = async function () {
 onMounted(async () => {
   await guildStore.fetchAllData()
   await loadArticles()
-
-  // Articles de démonstration pour tester l'affichage
-  const demoArticles = [
-    {
-      title: "Nouvelle mise à jour de l'interface !",
-      date: '2025-01-15',
-      body: `# Nouvelle interface utilisateur
-
-Nous avons complètement repensé l'interface pour une **meilleure expérience utilisateur**.
-
-## Nouveautés :
-- Design moderne et responsive
-- Navigation améliorée
-- Thème sombre optimisé
-- Intégration Discord améliorée
-
-*Profitez de toutes ces nouveautés dès maintenant !*`,
-      isGithubRelease: false,
-    },
-    {
-      title: 'Calendrier des raids M+ saison 1',
-      date: '2025-01-10',
-      body: `La nouvelle saison des **Mythic+ est lancée** ! 
-
-Rejoignez-nous pour nos sessions hebdomadaires :
-- **Mardi 20h** : M+ progression
-- **Jeudi 20h** : M+ farming
-- **Samedi 19h** : M+ détente
-
-Objectif : Keystone Master pour tous ! 🏆`,
-      isGithubRelease: false,
-    },
-    {
-      title: 'Recrutement : Tank & Heal',
-      date: '2025-01-05',
-      body: `## 🔍 On recrute !
-
-La guilde **Team Sabotâche** recherche :
-
-- **1 Tank** (DK/Warrior de préférence)
-- **1 Heal** (Priest/Paladin)
-
-**Profil recherché :**
-- Disponible raids 20h-23h
-- Expérience M15+ minimum
-- Bonne ambiance garantie ! 😊
-
-Contactez un officier en jeu !`,
-      isGithubRelease: false,
-    },
-  ]
 })
 
 // Computed pour les stats rapides
