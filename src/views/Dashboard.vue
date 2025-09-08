@@ -16,12 +16,11 @@ const articles = ref([])
 
 const loadArticles = async function () {
   const res = await API.get(`/items/articles`)
-  console.log('receive articles from Directus: ', res.data) 
   articles.value = res.data.data
 }
 
 onMounted(async () => {
-  await guildStore.fetchAllData()
+  await guildStore.getRanking()
   await loadArticles()
 })
 

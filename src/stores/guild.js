@@ -12,8 +12,9 @@ export const useGuildStore = defineStore('guild', () => {
   }
 
   const getProgress = async () => {
-    progress.value = await getGuildProgress(3)
-    const hmAwait = await getGuildProgress(4)
+    const nmAwait = await getGuildProgress(2)
+    const hmAwait = await getGuildProgress(3)
+    progress.value = nmAwait
     progress.value?.progressRaceData.progressRace.push(hmAwait.progressRaceData.progressRace?.[0])
     extractLastEncounter()
   }
