@@ -20,19 +20,16 @@ export const useGuildStore = defineStore('guild', () => {
   }
 
   const extractLastEncounter = () => {
-    console.log('Check data from progressData: ', progress.value.progressRaceData)
     const nm = progress.value.progressRaceData.progressRace?.[0]
     const hm = progress.value.progressRaceData.progressRace?.[1]
 
     if (nm?.encounters && nm.encounters.find(e => !e.isKilled)) {
-      console.log('Pass here on NM difficulty')
       lastEncounter.value = nm.encounters.find(e => !e.isKilled)
       lastEncounter.value.difficulty = 'normal'
     } else if (hm?.encounters && hm.encounters.find(e => !e.isKilled)) {
       lastEncounter.value = hm.encounters.find(e => !e.isKilled)
       lastEncounter.value.difficulty = 'heroic'
     } else {
-      console.log('Error on detect difficulties, pass default values')
       lastEncounter.value = hm?.encounters.slice(-1).pop()
       lastEncounter.value.difficulty = 'heroic'
       lastEncounter.value.status = 'finished'

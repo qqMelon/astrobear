@@ -113,7 +113,7 @@ function closeMenus() {
       <div v-if="user" class="navbar-user">
         <button class="user-button" @click="toggleUserMenu">
           <div class="user-info">
-            <span class="user-name">{{ user_mc.name || user.first_name }}</span>
+            <span class="user-name">{{ user_mc?.name || user.first_name }}</span>
             <span class="user-role">{{ user.role.name }}</span>
           </div>
           <img :src="user.avatar_char_url || defaultAvatar" :alt="user.first_name || 'Utilisateur'" class="user-avatar" />

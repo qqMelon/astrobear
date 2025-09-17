@@ -832,6 +832,7 @@ onMounted(() => {
                       <BaseButton
                         variant="success"
                         full-width
+                        :disabled="!token"
                         @click="setAsMainCharacter(selectedChar)"
                       >
                         <svg
