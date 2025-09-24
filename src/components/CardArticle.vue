@@ -23,7 +23,7 @@ defineProps({
   <div :class="['base-card', `base-card--${variant}`, `base-card--padding-${padding}`]">
     <article class="article-content">
       <header class="article-header">
-        <RouterLink :to="{ name: 'article-detail', params: { slug: article.slug }}" tag="h2" class="article-title">
+        <RouterLink :to="{ name: 'articles-detail', params: { slug: article.slug }}" tag="h2" class="article-title">
           {{ article.title }}
         </RouterLink>
       </header>

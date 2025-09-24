@@ -50,9 +50,18 @@ const router = createRouter({
       },
     },
     {
-      path: '/article/:slug',
-      name: 'article-detail',
-      component: () => import('./../views/ArticleDetail.vue'),
+      path: '/articles',
+      name: 'articles-list',
+      component: () => import('./../views/Articles.vue'),
+      props: true,
+      meta: {
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/articles/:slug',
+      name: 'articles-detail',
+      component: () => import('./../views/ArticlesDetail.vue'),
       props: true,
       meta: {
         requiresAuth: true,
@@ -84,7 +93,9 @@ router.beforeEach(async (to, from, next) => {
     try {
       if (!auth.user) {
         console.log('Pas de user, tentative de récupération...')
-        await auth.fetchUser()
+        const attemptToLog = await auth.fetchUser()
+        console.log('Call auth fetchUser: ', attemptToLog)
+        if (attemptToLog) return next()
       }
       return next()
     } catch (err) {
