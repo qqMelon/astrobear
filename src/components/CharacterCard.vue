@@ -264,7 +264,7 @@ const handleSetMain = event => {
 /* === BASE === */
 .character-card {
   position: relative;
-  background: rgba(43, 27, 24, 0.8);
+  background: color-mix(in srgb, var(--color-dark) 80%, transparent);
   border: 2px solid var(--color-border);
   border-radius: 12px;
   backdrop-filter: blur(10px);

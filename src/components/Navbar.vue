@@ -335,14 +335,14 @@ function closeMenus() {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: rgba(43, 27, 24, 0.9);
+  background: color-mix(in srgb, var(--color-dark) 90%, transparent);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--color-border);
   transition: all 0.3s ease;
 }
 
 .navbar-scrolled {
-  background: rgba(43, 27, 24, 0.95);
+  background: color-mix(in srgb, var(--color-dark) 95%, transparent);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -452,7 +452,7 @@ function closeMenus() {
   align-items: center;
   gap: 12px;
   padding: 8px 16px;
-  background: rgba(43, 27, 24, 0.6);
+  background: color-mix(in srgb, var(--color-dark) 60%, transparent);
   border: 2px solid var(--color-border);
   border-radius: 12px;
   color: var(--color-light);
@@ -463,7 +463,7 @@ function closeMenus() {
 
 .user-button:hover {
   border-color: var(--color-orange);
-  background: rgba(43, 27, 24, 0.8);
+  background: color-mix(in srgb, var(--color-dark) 80%, transparent);
 }
 
 .user-info {
@@ -511,7 +511,7 @@ function closeMenus() {
   top: calc(100% + 8px);
   right: 0;
   width: 280px;
-  background: rgba(43, 27, 24, 0.95);
+  background: color-mix(in srgb, var(--color-dark) 95%, transparent);
   border: 2px solid var(--color-border);
   border-radius: 12px;
   backdrop-filter: blur(20px);
@@ -596,14 +596,13 @@ function closeMenus() {
 }
 
 .logout-item {
-  color: #ef4444;
+  color: var(--color-danger);
   border-top: 1px solid var(--color-border);
   margin-top: 8px;
 }
 
 .logout-item:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  color: var(--color-danger);
 }
 
 /* === MOBILE MENU === */
@@ -633,7 +632,7 @@ function closeMenus() {
   top: 100%;
   left: 0;
   right: 0;
-  background: rgba(43, 27, 24, 0.95);
+  background: color-mix(in srgb, var(--color-dark) 95%, transparent);
   border-bottom: 2px solid var(--color-border);
   backdrop-filter: blur(20px);
   opacity: 0;
@@ -728,15 +727,15 @@ function closeMenus() {
 }
 
 .logout-mobile {
-  color: #ef4444;
+  color: var(--color-danger);
   border-top: 1px solid var(--color-border);
   margin-top: 8px;
   padding-top: 16px;
 }
 
 .logout-mobile:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  color: var(--color-danger);
 }
 
 /* === OVERLAY === */

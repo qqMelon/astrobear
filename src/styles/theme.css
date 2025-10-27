@@ -1,15 +1,39 @@
 /* === Couleurs inspirées du logo Team Sabotache === */
 :root {
-  --color-bg: #1b0f0f;
-  --color-dark: #2b1b18;
-  --color-accent: #8b3a2f;
-  --color-orange: #f9833a;
-  --color-light: #f5e0b9;
-  --color-green: #7c8a4e;
-  --color-danger: #ef4444;
-  --color-border: #3e2b28;
-  --color-white: #ffffff;
-  --color-gray: #888888;
+    --color-bg: #1a152b;        /* Fond global - violet spatial très sombre */
+    --color-dark: #241c3a;      /* Fond de carte - violet/noir profond */
+    --color-accent: #5516C7;    /* Boutons / accents violets intenses */
+    --color-accent-hover: #393EE2; /* Hover bleu-violet lumineux */
+    --color-highlight: #9b4dff; /* Pour petits détails / focus states */
+    --color-light: #D8DBE2;     /* Texte clair principal (argenté) */
+    --color-soft: #A9BCE0;      /* Texte secondaire, muted */
+    --color-danger: #E24F85;    /* Alerte en rose-magenta */
+    --color-border: #322c4a;    /* Bordures discrètes */
+    --color-white: #ffffff;
+    --color-gray: #9999aa;      /* Texte atténué */
+    
+    /* Extensions sémantiques */
+    --color-success: #10b981;        /* Succès / validation */
+    --color-success-dark: #059669;   /* Variante sombre pour dégradés */
+    --color-info: #3b82f6;           /* Info / bleu */
+    --color-info-dark: #1e3a8a;      /* Variante sombre pour dégradés */
+    --color-warning: #f59e0b;        /* Avertissement */
+    --color-warning-dark: #cc6a2a;   /* Variante sombre pour dégradés */
+    --color-danger-dark: #b91c1c;    /* Variante sombre danger */
+
+    /* Marques/services */
+    --color-discord: #5865f2;
+    --color-discord-light: #7289da;
+    --color-bnet: #00aeff;
+
+    /* Neutres supplémentaires */
+    --color-neutral-800: #1f2937;
+    --color-neutral-950: #1a1110;
+
+    --focus-ring: var(--color-highlight);
+    /* Alias legacy pour compatibilité avec l'existant */
+    --color-orange: var(--color-highlight);
+    --color-green: var(--color-success);
 }
 
 /* === Typographies === */
@@ -42,10 +66,42 @@ h5 {
 
 .btn-accent {
   background-color: var(--color-accent);
-  color: var(--color-light);
+  color: var(--color-white);
 }
 
 .btn-accent:hover {
-  background-color: var(--color-orange);
-  color: var(--color-dark);
+  background-color: var(--color-accent-hover);
+  color: var(--color-white);
 }
+
+/* === Accessibilité et états === */
+/* Focus visible standardisé */
+:where(button, [type="button"], [type="submit"], a, input, textarea, select, .btn-accent):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Désactivation des boutons accentués */
+.btn-accent:disabled,
+.btn-accent[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Variantes supplémentaires */
+.text-muted { color: var(--color-gray); }
+.l { color: var(--color-soft); }
+.text-light { color: var(--color-light); }
+.text-white { color: var(--color-white); }
+
+.bg { background-color: var(--color-bg); }
+.bg-dark { background-color: var(--color-dark); }
+
+.border { border: 1px solid var(--color-border); }
+.border-top { border-top: 1px solid var(--color-border); }
+.border-bottom { border-bottom: 1px solid var(--color-border); }
+
+/* Liens */
+a { color: var(--color-highlight); }
+a:hover { color: var(--color-accent-hover); }
+a:focus-visible { outline-color: var(--focus-ring); }

@@ -170,7 +170,7 @@ const sortedArticles = computed(() => {
 }
 
 .article-body :deep(code) {
-  background: rgba(245, 224, 185, 0.1);
+  background: color-mix(in srgb, var(--color-light) 10%, transparent);
   padding: 2px 6px;
   border-radius: 4px;
   font-family: 'Monaco', 'Menlo', monospace;
@@ -178,7 +178,7 @@ const sortedArticles = computed(() => {
 }
 
 .article-body :deep(pre) {
-  background: rgba(43, 27, 24, 0.8);
+  background: color-mix(in srgb, var(--color-dark) 80%, transparent);
   border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 16px;
@@ -223,7 +223,7 @@ const sortedArticles = computed(() => {
   display: inline-flex;
   align-items: center;
   padding: 8px 16px;
-  background: rgba(245, 224, 185, 0.1);
+  background: color-mix(in srgb, var(--color-light) 10%, transparent);
   border: 1px solid var(--color-border);
   border-radius: 6px;
   color: var(--color-light);
@@ -235,20 +235,20 @@ const sortedArticles = computed(() => {
 
 .github-link:hover,
 .read-more-link:hover {
-  background: rgba(245, 224, 185, 0.2);
+  background: color-mix(in srgb, var(--color-light) 20%, transparent);
   border-color: var(--color-orange);
   color: var(--color-orange);
 }
 
 .github-link {
-  background: rgba(88, 101, 242, 0.1);
-  border-color: rgba(88, 101, 242, 0.3);
-  color: #5865f2;
+  background: color-mix(in srgb, var(--color-discord) 10%, transparent);
+  border-color: color-mix(in srgb, var(--color-discord) 30%, transparent);
+  color: var(--color-accent-hover);
 }
 
 .github-link:hover {
-  background: rgba(88, 101, 242, 0.2);
-  border-color: #5865f2;
+  background: color-mix(in srgb, var(--color-discord) 20%, transparent);
+  border-color: var(--color-accent-hover);
 }
 
 .article-date {

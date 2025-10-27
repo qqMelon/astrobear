@@ -24,7 +24,7 @@ async function getGuildProgress(difficulty) {
 
   const query = `
     query {
-      progressRaceData{
+      progressRaceData{&
         progressRace(guildID: 763742, difficulty: ${difficulty})
       }
     }

@@ -205,7 +205,7 @@ const hasActiveFilters = computed(() => {
   width: 100%;
   height: 48px;
   padding: 12px 16px 12px 48px;
-  background: rgba(43, 27, 24, 0.6);
+  background: color-mix(in srgb, var(--color-dark) 60%, transparent);
   border: 2px solid var(--color-border);
   border-radius: 12px;
   color: var(--color-light);
@@ -218,8 +218,8 @@ const hasActiveFilters = computed(() => {
 .search-input:focus {
   outline: none;
   border-color: var(--color-orange);
-  background: rgba(43, 27, 24, 0.8);
-  box-shadow: 0 0 0 4px rgba(249, 131, 58, 0.1);
+  background: color-mix(in srgb, var(--color-dark) 80%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-orange) 10%, transparent);
 }
 
 .search-input::placeholder {
@@ -253,7 +253,7 @@ const hasActiveFilters = computed(() => {
 
 .clear-button:hover {
   color: var(--color-orange);
-  background: rgba(249, 131, 58, 0.1);
+  background: color-mix(in srgb, var(--color-orange) 10%, transparent);
 }
 
 .clear-button svg {
@@ -266,7 +266,7 @@ const hasActiveFilters = computed(() => {
   position: relative;
   height: 48px;
   padding: 12px 16px;
-  background: rgba(43, 27, 24, 0.6);
+  background: color-mix(in srgb, var(--color-dark) 60%, transparent);
   border: 2px solid var(--color-border);
   border-radius: 12px;
   color: var(--color-gray);
@@ -282,7 +282,7 @@ const hasActiveFilters = computed(() => {
 .filter-toggle-active {
   border-color: var(--color-orange);
   color: var(--color-orange);
-  background: rgba(43, 27, 24, 0.8);
+  background: color-mix(in srgb, var(--color-dark) 80%, transparent);
 }
 
 .filter-toggle svg {
@@ -311,7 +311,7 @@ const hasActiveFilters = computed(() => {
 .advanced-filters {
   margin-top: 16px;
   padding: 20px;
-  background: rgba(43, 27, 24, 0.4);
+  background: color-mix(in srgb, var(--color-dark) 40%, transparent);
   border: 1px solid var(--color-border);
   border-radius: 12px;
   backdrop-filter: blur(10px);
@@ -338,7 +338,7 @@ const hasActiveFilters = computed(() => {
 .filter-select {
   height: 40px;
   padding: 8px 12px;
-  background: rgba(43, 27, 24, 0.6);
+  background: color-mix(in srgb, var(--color-dark) 60%, transparent);
   border: 1px solid var(--color-border);
   border-radius: 8px;
   color: var(--color-light);
@@ -351,7 +351,7 @@ const hasActiveFilters = computed(() => {
 .filter-select:focus {
   outline: none;
   border-color: var(--color-orange);
-  box-shadow: 0 0 0 2px rgba(249, 131, 58, 0.1);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-orange) 10%, transparent);
 }
 
 .filter-select option {

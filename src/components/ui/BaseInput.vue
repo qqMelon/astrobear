@@ -128,7 +128,7 @@ const handleInput = event => {
   border-radius: 8px;
   font-size: 16px;
   transition: all 0.2s ease;
-  background: rgba(245, 224, 185, 0.1);
+  background: color-mix(in srgb, var(--color-light) 10%, transparent);
   color: var(--color-light);
   width: 100%; /* 👈 L'input prend toute la largeur du parent */
   box-sizing: border-box; /* 👈 Important pour inclure padding et border */
@@ -142,8 +142,8 @@ const handleInput = event => {
 .form-input:focus {
   outline: none;
   border-color: var(--color-orange);
-  box-shadow: 0 0 0 3px rgba(249, 131, 58, 0.2);
-  background: rgba(245, 224, 185, 0.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-orange) 20%, transparent);
+  background: color-mix(in srgb, var(--color-light) 15%, transparent);
 }
 
 .form-input--error {
@@ -152,13 +152,13 @@ const handleInput = event => {
 
 .form-input--error:focus {
   border-color: var(--color-danger);
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 20%, transparent);
 }
 
 .form-input--disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  background: rgba(245, 224, 185, 0.05);
+  background: color-mix(in srgb, var(--color-light) 5%, transparent);
 }
 
 .error-text {

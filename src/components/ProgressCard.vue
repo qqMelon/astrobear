@@ -204,7 +204,7 @@ const healthPercent = computed(() => {
 <style scoped>
 /* === PROGRESS CARD CONTAINER === */
 .progress-card {
-  background: rgba(43, 27, 24, 0.8);
+  background: color-mix(in srgb, var(--color-dark) 80%, transparent);
   border: 2px solid var(--color-border);
   border-radius: 12px;
   overflow: hidden;
@@ -417,9 +417,9 @@ const healthPercent = computed(() => {
   align-items: center;
   gap: 16px; /* Plus d'espace entre l'icône et le contenu */
   padding: 16px; /* Plus de padding */
-  background: rgba(245, 224, 185, 0.05);
+  background: color-mix(in srgb, var(--color-light) 5%, transparent);
   border-radius: 10px; /* Coins plus arrondis */
-  border: 1px solid rgba(245, 224, 185, 0.1);
+  border: 1px solid color-mix(in srgb, var(--color-light) 10%, transparent);
   transition: all 0.2s ease;
 }
 

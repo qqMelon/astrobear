@@ -53,7 +53,7 @@ function selectTab(tabId) {
   gap: 8px;
   margin-bottom: 32px;
   padding: 8px;
-  background: rgba(43, 27, 24, 0.6);
+  background: color-mix(in srgb, var(--color-dark) 60%, transparent);
   border-radius: 12px;
   border: 1px solid var(--color-border);
 }
@@ -76,13 +76,13 @@ function selectTab(tabId) {
 
 .tab-button:hover {
   color: var(--color-light);
-  background: rgba(245, 224, 185, 0.1);
+  background: color-mix(in srgb, var(--color-light) 10%, transparent);
 }
 
 .tab-active {
   color: var(--color-orange);
-  background: rgba(249, 131, 58, 0.15);
-  border: 1px solid rgba(249, 131, 58, 0.3);
+  background: color-mix(in srgb, var(--color-orange) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-orange) 30%, transparent);
 }
 
 .tab-icon {

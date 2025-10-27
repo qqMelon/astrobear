@@ -393,7 +393,7 @@ const tabs = [
   align-items: center;
   gap: 12px;
   padding: 16px 20px;
-  background: rgba(43, 27, 24, 0.6);
+  background: color-mix(in srgb, var(--color-dark) 60%, transparent);
   border: 2px solid var(--color-border);
   border-radius: 8px;
   color: var(--color-text);
@@ -407,7 +407,7 @@ const tabs = [
 
 .tab-button:hover {
   border-color: var(--color-accent);
-  background: rgba(43, 27, 24, 0.8);
+  background: color-mix(in srgb, var(--color-dark) 80%, transparent);
   transform: translateY(-2px);
 }
 
@@ -508,7 +508,7 @@ const tabs = [
 
 .data-table tbody td {
   padding: 14px 20px;
-  border-bottom: 1px solid rgba(43, 27, 24, 0.5);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-dark) 50%, transparent);
   color: var(--color-text);
   font-size: 15px;
 }

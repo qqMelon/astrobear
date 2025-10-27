@@ -315,7 +315,7 @@ onMounted(() => {
 
 /* === HEADER UTILISATEUR === */
 .settings-header {
-  background: rgba(43, 27, 24, 0.8);
+  background: color-mix(in srgb, var(--color-dark) 80%, transparent);
   border: 2px solid var(--color-border);
   border-radius: 16px;
   padding: 32px;
@@ -586,7 +586,7 @@ onMounted(() => {
 }
 
 .discord-icon svg {
-  color: #5865f2 !important;
+  color: var(--color-accent-hover) !important;
 }
 
 .battlenet-icon {

@@ -157,7 +157,7 @@ watch(visible, newVisible => {
 }
 
 .toast-close:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--color-white) 10%, transparent);
 }
 
 /* 🎯 Style explicite pour l'icône de fermeture */
@@ -169,25 +169,25 @@ watch(visible, newVisible => {
 
 /* === Types de BaseToast === */
 .toast-success {
-  background: rgba(124, 138, 78, 0.95);
+  background: color-mix(in srgb, var(--color-success) 20%, var(--color-dark) 80%);
   border-color: var(--color-green);
   color: var(--color-light);
 }
 
 .toast-danger {
-  background: rgba(239, 68, 68, 0.95);
+  background: color-mix(in srgb, var(--color-danger) 20%, var(--color-dark) 80%);
   border-color: var(--color-danger);
   color: var(--color-light);
 }
 
 .toast-warning {
-  background: rgba(249, 131, 58, 0.95);
+  background: color-mix(in srgb, var(--color-warning) 20%, var(--color-dark) 80%);
   border-color: var(--color-orange);
-  color: var(--color-dark);
+  color: var(--color-light);
 }
 
 .toast-primary {
-  background: rgba(139, 58, 47, 0.95);
+  background: color-mix(in srgb, var(--color-accent) 20%, var(--color-dark) 80%);
   border-color: var(--color-accent);
   color: var(--color-light);
 }

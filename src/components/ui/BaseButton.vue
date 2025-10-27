@@ -148,7 +148,7 @@ const handleClick = event => {
 
 .base-button--primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(249, 131, 58, 0.4);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--color-orange) 40%, transparent);
   background: linear-gradient(135deg, var(--color-orange) 0%, var(--color-accent) 100%);
 }
 
@@ -159,49 +159,49 @@ const handleClick = event => {
 }
 
 .base-button--secondary:hover:not(:disabled) {
-  background: rgba(245, 224, 185, 0.1);
+  background: color-mix(in srgb, var(--color-light) 10%, transparent);
   border-color: var(--color-orange);
   transform: translateY(-1px);
 }
 
 .base-button--danger {
-  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  background: linear-gradient(135deg, var(--color-danger-dark) 0%, var(--color-danger) 100%);
   color: var(--color-light);
 }
 
 .base-button--danger:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--color-danger) 40%, transparent);
 }
 
 .base-button--success {
-  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  background: linear-gradient(135deg, var(--color-success-dark) 0%, var(--color-success) 100%);
   color: var(--color-light);
 }
 
 .base-button--success:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--color-success) 40%, transparent);
 }
 
 .base-button--battlenet {
-  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, var(--color-info-dark) 0%, var(--color-info) 100%);
   color: var(--color-light);
 }
 
 .base-button--battlenet:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--color-info) 40%, transparent);
 }
 
 .base-button--discord {
-  background: linear-gradient(135deg, #5865f2 0%, #7289da 100%);
+  background: linear-gradient(135deg, var(--color-discord) 0%, var(--color-discord-light) 100%);
   color: var(--color-light);
 }
 
 .base-button--discord:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(114, 137, 218, 0.4);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--color-discord) 40%, transparent);
 }
 
 /* États */
@@ -247,7 +247,7 @@ const handleClick = event => {
 .loading-spinner {
   width: 20px;
   height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid color-mix(in srgb, var(--color-white) 30%, transparent);
   border-radius: 50%;
   border-top-color: currentColor;
   animation: spin 1s ease-in-out infinite;

@@ -428,7 +428,7 @@ function getEventTypeIcon(type) {
 
 /* === POPOVER PERSONNALISÉ === */
 .custom-popover {
-  background: rgba(43, 27, 24, 0.95);
+  background: color-mix(in srgb, var(--color-dark) 95%, transparent);
   border: 2px solid var(--color-border);
   border-radius: 8px;
   padding: 12px;

@@ -45,7 +45,7 @@ const handleLogin = async () => {
   <main class="login-container">
     <section class="login-wrapper">
       <header class="login-header">
-        <img src="@/assets/logo-sabotache.png" alt="Sabotache Logo" class="logo" />
+        <img src="@/assets/lait.png" alt="Sabotache Logo" class="logo" />
         <h1 class="login-title">Connexion</h1>
         <p class="login-subtitle">Accès réservé aux membres de la guilde</p>
       </header>
@@ -125,7 +125,7 @@ main {
 }
 
 .login-wrapper {
-  background: rgba(43, 27, 24, 0.95);
+  background: color-mix(in srgb, var(--color-dark) 95%, transparent);
   border: 2px solid var(--color-border);
   border-radius: 16px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);

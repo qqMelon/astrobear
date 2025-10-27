@@ -880,7 +880,7 @@ onMounted(() => {
 <style scoped>
 .profile-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--color-dark) 0%, #1a1110 100%);
+  background: linear-gradient(135deg, var(--color-dark) 0%, var(--color-neutral-950) 100%);
   padding: 32px 0;
 }
 
@@ -1025,8 +1025,8 @@ onMounted(() => {
   gap: 8px;
   margin-top: 12px;
   padding: 8px 12px;
-  background: rgba(249, 131, 58, 0.1);
-  border: 1px solid rgba(249, 131, 58, 0.3);
+  background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-warning) 30%, transparent);
   border-radius: 8px;
   font-size: 14px;
   color: var(--color-orange);
@@ -1091,13 +1091,13 @@ onMounted(() => {
   bottom: -8px;
   left: 50%;
   transform: translateX(-50%);
-  background: linear-gradient(135deg, var(--color-orange), #e67e22);
+  background: linear-gradient(135deg, var(--color-orange), var(--color-warning-dark));
   color: white;
   padding: 4px 12px;
   border-radius: 12px;
   font-size: 14px;
   font-weight: bold;
-  box-shadow: 0 4px 12px rgba(249, 131, 58, 0.4);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-warning) 40%, transparent);
   white-space: nowrap;
 }
 
@@ -1105,7 +1105,7 @@ onMounted(() => {
   position: absolute;
   top: -8px;
   left: -8px;
-  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  background: linear-gradient(135deg, var(--color-success-dark), var(--color-success));
   color: white;
   padding: 4px 8px;
   border-radius: 8px;
@@ -1114,7 +1114,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 4px;
-  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-success) 40%, transparent);
   white-space: nowrap;
 }
 
@@ -1127,7 +1127,7 @@ onMounted(() => {
   position: absolute;
   top: -8px;
   right: -8px;
-  background: rgba(43, 27, 24, 0.9);
+  background: color-mix(in srgb, var(--color-dark) 90%, transparent);
   color: var(--color-light);
   padding: 4px 8px;
   border-radius: 8px;
@@ -1212,7 +1212,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #27ae60;
+  color: var(--color-success);
   justify-content: flex-end;
 }
 
